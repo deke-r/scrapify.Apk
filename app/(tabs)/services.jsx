@@ -2,17 +2,29 @@
 
 import { Ionicons } from "@expo/vector-icons"
 import { LinearGradient } from "expo-linear-gradient"
-import { useRouter } from "expo-router"
-import { useState } from "react"
+import { useLocalSearchParams, useRouter } from "expo-router"
+import { useEffect, useState } from "react"
 import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 
 const Services = () => {
   const router = useRouter()
+  const params = useLocalSearchParams()
   const [selectedService, setSelectedService] = useState(null)
   const [selectedItems, setSelectedItems] = useState([])
   const [showItemModal, setShowItemModal] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
+
+  // Auto-open modal for specific service if passed as parameter
+  useEffect(() => {
+    if (params.selectedService) {
+      const serviceToOpen = services.find(service => service.title === params.selectedService)
+      if (serviceToOpen) {
+        setSelectedService(serviceToOpen)
+        setShowItemModal(true)
+      }
+    }
+  }, [params.selectedService])
 
   const services = [
     {
@@ -161,7 +173,7 @@ const Services = () => {
 
           {/* Services Grid */}
           <View style={styles.servicesContainer}>
-            <Text style={styles.sectionTitle}>Choose a Service</Text>
+            {/* <Text style={styles.sectionTitle}>Choose a Service</Text> */}
             {services.map((service) => (
               <TouchableOpacity
                 key={service.id}
