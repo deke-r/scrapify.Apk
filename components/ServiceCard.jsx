@@ -90,13 +90,13 @@ const ServiceCard = ({ service }) => {
           </View>
 
           {/* Categories */}
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoriesContainer}>
+          {/* <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoriesContainer}>
             {categories.map((category, index) => (
               <TouchableOpacity key={index} style={styles.categoryChip}>
                 <Text style={styles.categoryText}>{category}</Text>
               </TouchableOpacity>
             ))}
-          </ScrollView>
+          </ScrollView> */}
 
           {/* Items List */}
           <ScrollView style={styles.itemsList}>
@@ -236,7 +236,8 @@ const styles = StyleSheet.create({
   },
   itemsList: {
     flex: 1,
-    paddingHorizontal: 16,
+    paddingHorizontal: 16, 
+    marginVertical:20
   },
   itemCard: {
     flexDirection: "row",

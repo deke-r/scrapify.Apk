@@ -1,6 +1,7 @@
 "use client"
 
 import { Ionicons } from "@expo/vector-icons"
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { LinearGradient } from "expo-linear-gradient"
 import { useRouter } from "expo-router"
 import { useState } from "react"
@@ -91,7 +92,7 @@ const Profile = () => {
       <LinearGradient colors={["#a8e6cf", "#ffffff"]} style={styles.gradient}>
         <ScrollView
           showsVerticalScrollIndicator={false} className=''
-          contentContainerStyle={{ paddingBottom:100 }}
+          contentContainerStyle={{ paddingBottom: 100 }}
         >
           {/* Header */}
           <View style={styles.header}>
@@ -173,7 +174,19 @@ const Profile = () => {
             onPress={() =>
               Alert.alert("Logout", "Are you sure you want to logout?", [
                 { text: "Cancel", style: "cancel" },
-                { text: "Logout", style: "destructive" },
+                {
+                  text: "Logout",
+                  style: "destructive",
+                  onPress: async () => {
+                    try {
+                      await AsyncStorage.removeItem('userToken'); 
+                      router.replace('/(auth)/login');
+
+                    } catch (error) {
+                      console.error("Error logging out", error);
+                    }
+                  },
+                },
               ])
             }
           >
@@ -192,7 +205,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#a8e6cf",
-    paddingBottom:-50
+    paddingBottom: -50
   },
   gradient: {
     flex: 1,
