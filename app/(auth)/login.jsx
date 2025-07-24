@@ -23,14 +23,13 @@ export default function Login() {
   const onSubmit = async (data) => {
     setLoading(true)
     try {
-      const response = await axios.post('http://192.168.1.10:9000/api/scrapify/login', {
+      const response = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/login`, {
         email: data.email,
         password: data.password
       });
-      // Save user info or token if needed
-      await AsyncStorage.setItem("userToken", response.data.user?.id?.toString() || "token");
-      // Optionally, store more user info if needed
-      router.replace("/(tabs)/"); // redirect to tabs
+      console.log(response.data)
+      await AsyncStorage.setItem("userToken", response.data.token);
+      router.replace("/(tabs)/");
     } catch (err) {
       console.log('Login error:', err, err.response?.data);
       Alert.alert("Login Failed", err.response?.data?.error || "Invalid email or password");

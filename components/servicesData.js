@@ -3,7 +3,7 @@ export const services = [
     id: 1,
     title: "Scrap Dealing",
     description: "Sell your scrap materials at best prices",
-    icon: "recycle",
+    icon: "refresh",
     color: "#4CAF50",
     items: [
       { id: 1, name: "Iron & Steel", price: "₹25-30/kg", category: "Metal" },

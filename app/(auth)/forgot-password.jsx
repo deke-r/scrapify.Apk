@@ -21,7 +21,7 @@ export default function ForgotPassword() {
   const handleSendOtp = async (data) => {
     setLoading(true);
     try {
-      await axios.post("http://192.168.1.10:9000/api/scrapify/forgot-password/send-otp", { email: data.email });
+      await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/forgot-password/send-otp`, { email: data.email });
       setEmail(data.email);
       setOtpSent(true);
       setStep(2);

@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 require('dotenv').config();
 const validator = require('validator');
+const jwt = require('jsonwebtoken');
 
 router.get('/test', (req, res) => {
   res.json({ message: 'API is working!' });
@@ -16,7 +17,7 @@ router.get('/test', (req, res) => {
 router.post('/send-otp', (req, res) => {
   let { email } = req.body;
   email = validator.trim(email || '');
-  email = validator.normalizeEmail(email);
+  email = validator.normalizeEmail(email, { gmail_remove_dots: false });
   if (!email || !validator.isEmail(email)) return res.status(400).json({ error: 'Valid email is required' });
   const otp = crypto.randomInt(1000, 10000).toString();
   con.query(
@@ -51,7 +52,7 @@ router.post('/send-otp', (req, res) => {
 router.post('/verify-otp', (req, res) => {
   let { email, otp } = req.body;
   email = validator.trim(email || '');
-  email = validator.normalizeEmail(email);
+  email = validator.normalizeEmail(email, { gmail_remove_dots: false });
   otp = validator.trim(otp || '');
   if (!email || !validator.isEmail(email) || !otp || !validator.isNumeric(otp)) return res.status(400).json({ error: 'Valid email and OTP are required' });
   con.query(
@@ -74,7 +75,7 @@ router.post('/verify-otp', (req, res) => {
 router.post('/forgot-password/send-otp', (req, res) => {
   let { email } = req.body;
   email = validator.trim(email || '');
-  email = validator.normalizeEmail(email);
+  email = validator.normalizeEmail(email, { gmail_remove_dots: false });
   if (!email || !validator.isEmail(email)) return res.status(400).json({ error: 'Valid email is required' });
   // Check if email exists in users table
   con.query(
@@ -124,7 +125,7 @@ router.post('/forgot-password/send-otp', (req, res) => {
 router.post('/forgot-password/verify-otp', (req, res) => {
   let { email, otp } = req.body;
   email = validator.trim(email || '');
-  email = validator.normalizeEmail(email);
+  email = validator.normalizeEmail(email, { gmail_remove_dots: false });
   otp = validator.trim(otp || '');
   if (!email || !validator.isEmail(email) || !otp || !validator.isNumeric(otp)) return res.status(400).json({ error: 'Valid email and OTP are required' });
   con.query(
@@ -147,7 +148,7 @@ router.post('/forgot-password/verify-otp', (req, res) => {
 router.post('/forgot-password/reset', async (req, res) => {
   let { email, otp, newPassword } = req.body;
   email = validator.trim(email || '');
-  email = validator.normalizeEmail(email);
+  email = validator.normalizeEmail(email, { gmail_remove_dots: false });
   otp = validator.trim(otp || '');
   newPassword = validator.trim(newPassword || '');
   if (!email || !validator.isEmail(email) || !otp || !validator.isNumeric(otp) || !newPassword) {
@@ -188,7 +189,7 @@ router.post('/signup', async (req, res) => {
   name = validator.trim(name || '');
   name = validator.escape(name);
   email = validator.trim(email || '');
-  email = validator.normalizeEmail(email);
+  email = validator.normalizeEmail(email, { gmail_remove_dots: false });
   phone = validator.trim(phone || '');
   password = validator.trim(password || '');
   if (!name || !email || !phone || !password || !validator.isEmail(email) || !validator.isMobilePhone(phone, 'any')) {
@@ -225,7 +226,7 @@ router.post('/signup', async (req, res) => {
 router.post('/login', (req, res) => {
   let { email, password } = req.body;
   email = validator.trim(email || '');
-  email = validator.normalizeEmail(email);
+  email = validator.normalizeEmail(email, { gmail_remove_dots: false });
   password = validator.trim(password || '');
   if (!email || !password || !validator.isEmail(email)) {
     return res.status(400).json({ error: 'Email and password are required' });
@@ -247,8 +248,13 @@ router.post('/login', (req, res) => {
       if (!match) {
         return res.status(401).json({ error: 'Invalid email or password' });
       }
-      // Optionally, you can return user info or a token here
-      res.json({ message: 'Login successful', user: { id: user.id, name: user.name, email: user.email, phone: user.phone } });
+      // Generate JWT token
+      const token = jwt.sign(
+        { id: user.id, email: user.email },
+        process.env.JWT_SECRET,
+        { expiresIn: '30d' }
+      );
+      res.json({ message: 'Login successful', user: { id: user.id, name: user.name, email: user.email, phone: user.phone }, token });
     }
   );
 });
