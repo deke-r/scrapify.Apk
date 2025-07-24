@@ -1,6 +1,7 @@
 "use client"
 
 import AsyncStorage from "@react-native-async-storage/async-storage"
+import axios from "axios"
 import { BlurView } from "expo-blur"
 import { LinearGradient } from "expo-linear-gradient"
 import { useRouter } from "expo-router"
@@ -21,16 +22,21 @@ export default function Login() {
 
   const onSubmit = async (data) => {
     setLoading(true)
-    setTimeout(async () => {
+    try {
+      const response = await axios.post('http://192.168.1.10:9000/api/scrapify/login', {
+        email: data.email,
+        password: data.password
+      });
+      // Save user info or token if needed
+      await AsyncStorage.setItem("userToken", response.data.user?.id?.toString() || "token");
+      // Optionally, store more user info if needed
+      router.replace("/(tabs)/"); // redirect to tabs
+    } catch (err) {
+      console.log('Login error:', err, err.response?.data);
+      Alert.alert("Login Failed", err.response?.data?.error || "Invalid email or password");
+    } finally {
       setLoading(false)
-      const { email, password } = data
-      if (email === "test@gmail.com" && password === "pass123") {
-        await AsyncStorage.setItem("userToken", "dummy-token")
-        router.replace("/(tabs)/") // redirect to tabs
-      } else {
-        Alert.alert("Login Failed", "Invalid email or password")
-      }
-    }, 1200)
+    }
   }
 
   return (
@@ -109,6 +115,14 @@ export default function Login() {
                 >
                   <Text style={styles.buttonText}>{loading ? "Signing in..." : "Sign In"}</Text>
                 </LinearGradient>
+              </TouchableOpacity>
+
+              {/* Forgot password link */}
+              <TouchableOpacity
+                style={{ alignSelf: 'flex-end', marginBottom: 16 }}
+                onPress={() => router.push('/forgot-password')}
+              >
+                <Text style={styles.forgotText}>Forgot password?</Text>
               </TouchableOpacity>
 
               <TouchableOpacity onPress={() => router.push("/signup")}>
@@ -259,5 +273,12 @@ const styles = StyleSheet.create({
   linkTextBold: {
     fontWeight: "600",
     color: "#065f46",
+  },
+  forgotText: {
+    color: '#047857',
+    fontSize: 15,
+    fontWeight: '500',
+    textAlign: 'right',
+    marginBottom: 0,
   },
 })

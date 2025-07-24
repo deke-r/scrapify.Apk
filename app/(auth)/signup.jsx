@@ -1,20 +1,20 @@
 "use client"
 
-import AsyncStorage from "@react-native-async-storage/async-storage"
+import axios from "axios"
 import { BlurView } from "expo-blur"
 import { LinearGradient } from "expo-linear-gradient"
 import { useRouter } from "expo-router"
 import { useRef, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
-import { Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
+import { Alert, Image, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 
 export default function Signup() {
   const router = useRouter()
-  const [step, setStep] = useState(1) // 1: signup, 2: otp
+  const [step, setStep] = useState(1)
   const [otp, setOtp] = useState(["", "", "", ""])
-  const [sentOtp, setSentOtp] = useState("")
   const [loading, setLoading] = useState(false)
+  const [userData, setUserData] = useState(null);
 
   // Refs for OTP inputs
   const otpRefs = [useRef(null), useRef(null), useRef(null), useRef(null)]
@@ -28,220 +28,240 @@ export default function Signup() {
     defaultValues: { name: "", email: "", phone: "", password: "" },
   })
 
-  const onSubmitSignup = async (data) => {
-    setLoading(true)
-    setTimeout(() => {
-      const generatedOtp = "1234"
-      setSentOtp(generatedOtp)
-      setStep(2)
-      setLoading(false)
-      Alert.alert("OTP Sent", `Your OTP is ${generatedOtp}`) // Note: Don't show OTP in production
-    }, 1000)
+const onSubmitSignup = async (data) => {
+  setLoading(true);
+  try {
+    await axios.post('http://192.168.1.10:9000/api/scrapify/send-otp', { email: data.email });
+    setUserData(data);
+    setStep(2);
+    Alert.alert('OTP Sent', 'Check your email for the OTP.');
+  } catch (err) {
+    console.log('Send OTP error:', err, err.response?.data);
+    Alert.alert('Error', err.response?.data?.error || 'Failed to send OTP');
+  } finally {
+    setLoading(false);
   }
+};
+
+
 
   const handleOtpChange = (value, index) => {
     const newOtp = [...otp]
     newOtp[index] = value
 
     setOtp(newOtp)
-
-    // Auto focus next input
     if (value && index < 3) {
       otpRefs[index + 1].current?.focus()
     }
   }
 
   const handleOtpKeyPress = (e, index) => {
-    // Handle backspace
     if (e.nativeEvent.key === "Backspace" && !otp[index] && index > 0) {
       otpRefs[index - 1].current?.focus()
     }
   }
 
-  const handleVerifyOtp = async () => {
-    const enteredOtp = otp.join("")
-    if (enteredOtp === sentOtp) {
-      await AsyncStorage.setItem("userToken", "dummy-token")
-      router.replace("/(tabs)/")
-    } else {
-      Alert.alert("Invalid OTP", "The OTP you entered is incorrect.")
-    }
+const handleVerifyOtp = async () => {
+  const enteredOtp = otp.join('');
+  try {
+    await axios.post('http://192.168.1.10:9000/api/scrapify/verify-otp', {
+      email: userData.email,
+      otp: enteredOtp
+    });
+    await axios.post('http://192.168.1.10:9000/api/scrapify/signup', userData);
+    Alert.alert('Success', 'Account created!');
+    router.push('/login');
+  } catch (err) {
+    Alert.alert('Error', err.response?.data?.error || 'OTP invalid or signup failed');
   }
+};
+
 
   return (
-    <LinearGradient colors={["#a8e6cf", "#ffffff"]} style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.formContainer}>
-          <BlurView intensity={20} style={styles.glassContainer}>
-            <View style={styles.form}>
-              {/* Logo Section */}
-              <View style={styles.logoContainer}>
-                <Image source={require("../../assets/images/logo2.png")} style={styles.logoPlaceholder} />
-              </View>
-
-              {step === 1 ? (
-                <>
-                  <Text style={styles.title}>Create Account</Text>
-                  <Text style={styles.subtitle}>Join us today</Text>
-
-                  <Controller
-                    control={control}
-                    name="name"
-                    rules={{ required: "Name is required" }}
-                    render={({ field: { onChange, value } }) => (
-                      <View style={styles.inputContainer}>
-                        <TextInput
-                          style={[styles.input, errors.name && styles.inputError]}
-                          placeholder="Full Name"
-                          placeholderTextColor="rgba(6, 95, 70, 0.6)"
-                          value={value}
-                          onChangeText={onChange}
-                        />
-                      </View>
-                    )}
-                  />
-                  {errors.name && <Text style={styles.errorText}>{errors.name.message}</Text>}
-
-                  <Controller
-                    control={control}
-                    name="email"
-                    rules={{
-                      required: "Email is required",
-                      pattern: {
-                        value: /^[^@\s]+@[^@\s]+\.[^@\s]+$/,
-                        message: "Invalid email format",
-                      },
-                    }}
-                    render={({ field: { onChange, value } }) => (
-                      <View style={styles.inputContainer}>
-                        <TextInput
-                          style={[styles.input, errors.email && styles.inputError]}
-                          placeholder="Email"
-                          placeholderTextColor="rgba(6, 95, 70, 0.6)"
-                          value={value}
-                          onChangeText={onChange}
-                          autoCapitalize="none"
-                          keyboardType="email-address"
-                        />
-                      </View>
-                    )}
-                  />
-                  {errors.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
-
-                  <Controller
-                    control={control}
-                    name="phone"
-                    rules={{
-                      required: "Phone is required",
-                      pattern: {
-                        value: /^\d{10}$/,
-                        message: "Phone must be 10 digits",
-                      },
-                    }}
-                    render={({ field: { onChange, value } }) => (
-                      <View style={styles.inputContainer}>
-                        <TextInput
-                          style={[styles.input, errors.phone && styles.inputError]}
-                          placeholder="Phone (10 digits)"
-                          placeholderTextColor="rgba(6, 95, 70, 0.6)"
-                          value={value}
-                          onChangeText={onChange}
-                          keyboardType="phone-pad"
-                          maxLength={10}
-                        />
-                      </View>
-                    )}
-                  />
-                  {errors.phone && <Text style={styles.errorText}>{errors.phone.message}</Text>}
-
-                  <Controller
-                    control={control}
-                    name="password"
-                    rules={{
-                      required: "Password is required",
-                      minLength: {
-                        value: 6,
-                        message: "Password must be at least 6 characters",
-                      },
-                    }}
-                    render={({ field: { onChange, value } }) => (
-                      <View style={styles.inputContainer}>
-                        <TextInput
-                          style={[styles.input, errors.password && styles.inputError]}
-                          placeholder="Password"
-                          placeholderTextColor="rgba(6, 95, 70, 0.6)"
-                          value={value}
-                          onChangeText={onChange}
-                          secureTextEntry
-                        />
-                      </View>
-                    )}
-                  />
-                  {errors.password && <Text style={styles.errorText}>{errors.password.message}</Text>}
-
-                  <TouchableOpacity
-                    style={[styles.button, loading && styles.buttonDisabled]}
-                    onPress={handleSubmit(onSubmitSignup)}
-                    disabled={loading}
-                  >
-                    <LinearGradient
-                      colors={loading ? ["#cccccc", "#999999"] : ["#4ade80", "#22c55e"]}
-                      style={styles.buttonGradient}
-                    >
-                      <Text style={styles.buttonText}>{loading ? "Sending OTP..." : "Sign Up"}</Text>
-                    </LinearGradient>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity onPress={() => router.push("/login")}>
-                    <Text style={styles.linkText}>
-                      Already have an account? <Text style={styles.linkTextBold}>Login</Text>
-                    </Text>
-                  </TouchableOpacity>
-                </>
-              ) : (
-                <>
-                  <Text style={styles.title}>Verify OTP</Text>
-                  <Text style={styles.subtitle}>Enter the 4-digit OTP sent to your phone/email</Text>
-
-                  <View style={styles.otpContainer}>
-                    {otp.map((digit, index) => (
-                      <TextInput
-                        key={index}
-                        ref={otpRefs[index]}
-                        style={styles.otpInput}
-                        value={digit}
-                        onChangeText={(value) => handleOtpChange(value, index)}
-                        onKeyPress={(e) => handleOtpKeyPress(e, index)}
-                        keyboardType="number-pad"
-                        maxLength={1}
-                        textAlign="center"
-                        selectTextOnFocus
-                      />
-                    ))}
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <LinearGradient colors={["#a8e6cf", "#ffffff"]} style={styles.container}>
+          <SafeAreaView style={styles.safeArea}>
+            <View style={styles.formContainer}>
+              <BlurView intensity={20} style={styles.glassContainer}>
+                <View style={styles.form}>
+                  {/* Logo Section */}
+                  <View style={styles.logoContainer}>
+                    <Image source={require("../../assets/images/logo2.png")} style={styles.logoPlaceholder} />
                   </View>
 
-                  <TouchableOpacity
-                    style={[styles.button, otp.join("").length !== 4 && styles.buttonDisabled]}
-                    onPress={handleVerifyOtp}
-                    disabled={otp.join("").length !== 4}
-                  >
-                    <LinearGradient colors={["#4ade80", "#22c55e"]} style={styles.buttonGradient}>
-                      <Text style={styles.buttonText}>Verify & Continue</Text>
-                    </LinearGradient>
-                  </TouchableOpacity>
+                  {step === 1 ? (
+                    <>
+                      <Text style={styles.title}>Create Account</Text>
+                      <Text style={styles.subtitle}>Join us today</Text>
 
-                  <TouchableOpacity onPress={() => setStep(1)}>
-                    <Text style={styles.linkText}>
-                      <Text style={styles.linkTextBold}>← Back to Signup</Text>
-                    </Text>
-                  </TouchableOpacity>
-                </>
-              )}
+                      <Controller
+                        control={control}
+                        name="name"
+                        rules={{ required: "Name is required" }}
+                        render={({ field: { onChange, value } }) => (
+                          <View style={styles.inputContainer}>
+                            <TextInput
+                              style={[styles.input, errors.name && styles.inputError]}
+                              placeholder="Full Name"
+                              placeholderTextColor="rgba(6, 95, 70, 0.6)"
+                              value={value}
+                              onChangeText={onChange}
+                            />
+                          </View>
+                        )}
+                      />
+                      {errors.name && <Text style={styles.errorText}>{errors.name.message}</Text>}
+
+                      <Controller
+                        control={control}
+                        name="email"
+                        rules={{
+                          required: "Email is required",
+                          pattern: {
+                            value: /^[^@\s]+@[^@\s]+\.[^@\s]+$/,
+                            message: "Invalid email format",
+                          },
+                        }}
+                        render={({ field: { onChange, value } }) => (
+                          <View style={styles.inputContainer}>
+                            <TextInput
+                              style={[styles.input, errors.email && styles.inputError]}
+                              placeholder="Email"
+                              placeholderTextColor="rgba(6, 95, 70, 0.6)"
+                              value={value}
+                              onChangeText={onChange}
+                              autoCapitalize="none"
+                              keyboardType="email-address"
+                            />
+                          </View>
+                        )}
+                      />
+                      {errors.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
+
+                      <Controller
+                        control={control}
+                        name="phone"
+                        rules={{
+                          required: "Phone is required",
+                          pattern: {
+                            value: /^\d{10}$/,
+                            message: "Phone must be 10 digits",
+                          },
+                        }}
+                        render={({ field: { onChange, value } }) => (
+                          <View style={styles.inputContainer}>
+                            <TextInput
+                              style={[styles.input, errors.phone && styles.inputError]}
+                              placeholder="Phone (10 digits)"
+                              placeholderTextColor="rgba(6, 95, 70, 0.6)"
+                              value={value}
+                              onChangeText={onChange}
+                              keyboardType="phone-pad"
+                              maxLength={10}
+                              returnKeyType="done"
+                              onSubmitEditing={Keyboard.dismiss}
+                            />
+                          </View>
+                        )}
+                      />
+                      {errors.phone && <Text style={styles.errorText}>{errors.phone.message}</Text>}
+
+                      <Controller
+                        control={control}
+                        name="password"
+                        rules={{
+                          required: "Password is required",
+                          minLength: {
+                            value: 6,
+                            message: "Password must be at least 6 characters",
+                          },
+                        }}
+                        render={({ field: { onChange, value } }) => (
+                          <View style={styles.inputContainer}>
+                            <TextInput
+                              style={[styles.input, errors.password && styles.inputError]}
+                              placeholder="Password"
+                              placeholderTextColor="rgba(6, 95, 70, 0.6)"
+                              value={value}
+                              onChangeText={onChange}
+                              secureTextEntry
+                            />
+                          </View>
+                        )}
+                      />
+                      {errors.password && <Text style={styles.errorText}>{errors.password.message}</Text>}
+
+                      <TouchableOpacity
+                        style={[styles.button, loading && styles.buttonDisabled]}
+                        onPress={handleSubmit(onSubmitSignup)}
+                        disabled={loading}
+                      >
+                        <LinearGradient
+                          colors={loading ? ["#cccccc", "#999999"] : ["#4ade80", "#22c55e"]}
+                          style={styles.buttonGradient}
+                        >
+                          <Text style={styles.buttonText}>{loading ? "Sending OTP..." : "Sign Up"}</Text>
+                        </LinearGradient>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity onPress={() => router.push("/login")}>
+                        <Text style={styles.linkText}>
+                          Already have an account? <Text style={styles.linkTextBold}>Login</Text>
+                        </Text>
+                      </TouchableOpacity>
+                    </>
+                  ) : (
+                    <>
+                      <Text style={styles.title}>Verify OTP</Text>
+                      <Text style={styles.subtitle}>Enter the 4-digit OTP sent to your phone/email</Text>
+
+                      <View style={styles.otpContainer}>
+                        {otp.map((digit, index) => (
+                          <TextInput
+                            key={index}
+                            ref={otpRefs[index]}
+                            style={styles.otpInput}
+                            value={digit}
+                            onChangeText={(value) => handleOtpChange(value, index)}
+                            onKeyPress={(e) => handleOtpKeyPress(e, index)}
+                            keyboardType="number-pad"
+                            maxLength={1}
+                            textAlign="center"
+                            selectTextOnFocus
+                            returnKeyType="done"
+                            onSubmitEditing={Keyboard.dismiss}
+                          />
+                        ))}
+                      </View>
+
+                      <TouchableOpacity
+                        style={[styles.button, otp.join("").length !== 4 && styles.buttonDisabled]}
+                        onPress={handleVerifyOtp}
+                        disabled={otp.join("").length !== 4}
+                      >
+                        <LinearGradient colors={["#4ade80", "#22c55e"]} style={styles.buttonGradient}>
+                          <Text style={styles.buttonText}>Verify & Continue</Text>
+                        </LinearGradient>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity onPress={() => setStep(1)}>
+                        <Text style={styles.linkText}>
+                          <Text style={styles.linkTextBold}>← Back to Signup</Text>
+                        </Text>
+                      </TouchableOpacity>
+                    </>
+                  )}
+                </View>
+              </BlurView>
             </View>
-          </BlurView>
-        </View>
-      </SafeAreaView>
-    </LinearGradient>
+          </SafeAreaView>
+        </LinearGradient>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   )
 }
 
