@@ -31,7 +31,7 @@ export default function Signup() {
 const onSubmitSignup = async (data) => {
   setLoading(true);
   try {
-    await axios.post('http://192.168.1.10:9000/api/scrapify/send-otp', { email: data.email });
+    await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/send-otp`, { email: data.email });
     setUserData(data);
     setStep(2);
     Alert.alert('OTP Sent', 'Check your email for the OTP.');
@@ -64,11 +64,11 @@ const onSubmitSignup = async (data) => {
 const handleVerifyOtp = async () => {
   const enteredOtp = otp.join('');
   try {
-    await axios.post('http://192.168.1.10:9000/api/scrapify/verify-otp', {
+    await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/verify-otp`, {
       email: userData.email,
       otp: enteredOtp
     });
-    await axios.post('http://192.168.1.10:9000/api/scrapify/signup', userData);
+    await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/signup`, userData);
     Alert.alert('Success', 'Account created!');
     router.push('/login');
   } catch (err) {
