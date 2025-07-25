@@ -348,4 +348,47 @@ router.post('/upload-profile-pic',authenticate, upload.single('profilePic'), (re
   });
 });
 
+
+
+router.put('/profile', authenticate, async (req, res) => {
+  const userId = req.user.id;
+  let { name, phone, password } = req.body;
+
+ 
+  name = validator.trim(name || '');
+  phone = validator.trim(phone || '');
+
+  if (!name || !phone) {
+    return res.status(400).json({ error: 'Name and phone are required.' });
+  }
+
+  let sql = 'UPDATE users SET name = ?, phone = ?';
+  let params = [name, phone];
+
+  if (password) {
+    password = validator.trim(password);
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters.' });
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    sql += ', password = ?';
+    params.push(hashedPassword);
+  }
+
+  sql += ' WHERE id = ?';
+  params.push(userId);
+
+  con.query(sql, params, (err, result) => {
+    if (err) {
+      console.error('Error updating profile:', err);
+      return res.status(500).json({ error: 'Server error' });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.json({ success: true, message: 'Profile updated successfully.' });
+  });
+});
+
+
 module.exports = router;

@@ -96,7 +96,7 @@ const Profile = () => {
       icon: "person-outline",
       title: "Edit Profile",
       subtitle: "Update your personal information",
-      onPress: () => Alert.alert("Edit Profile", "Profile editing feature coming soon!"),
+      onPress: () => router.push('/edit-profile'),
     },
     {
       icon: "list-outline",
@@ -178,15 +178,15 @@ const Profile = () => {
           contentContainerStyle={{ paddingBottom: 100 }}
         >
           {/* Header */}
-          <View style={styles.header}>
+          {/* <View style={styles.header}>
             <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
               <Ionicons name="arrow-back" size={24} color="#2E7D32" />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>My Profile</Text>
             <TouchableOpacity style={styles.editButton}>
-              {/* <Ionicons name="create-outline" size={24} color="#2E7D32" /> */}
+              <Ionicons name="create-outline" size={24} color="#2E7D32" />
             </TouchableOpacity>
-          </View>
+          </View> */}
 
           {/* Profile Card */}
           <View style={styles.profileCard}>

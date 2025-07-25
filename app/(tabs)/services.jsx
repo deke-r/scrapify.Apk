@@ -156,7 +156,7 @@ const Services = () => {
       <LinearGradient colors={["#a8e6cf", "#ffffff"]} style={styles.gradient}>
         <ScrollView >
           {/* Header */}
-          <View style={styles.header}>
+          {/* <View style={styles.header}>
             <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
               <Ionicons name="arrow-back" size={24} color="#2E7D32" />
             </TouchableOpacity>
@@ -169,7 +169,7 @@ const Services = () => {
               )}
               <Ionicons name="bag-outline" size={24} color="#2E7D32" />
             </View>
-          </View>
+          </View> */}
 
           {/* Services Grid */}
           <View style={styles.servicesContainer}>

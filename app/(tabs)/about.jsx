@@ -62,12 +62,12 @@ const About = () => {
       <LinearGradient colors={["#a8e6cf", "#ffffff"]} style={styles.gradient}>
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* Header */}
-          <View style={styles.header}>
+          {/* <View style={styles.header}>
             <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
               <Ionicons name="arrow-back" size={24} color="#2E7D32" />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>About Scrapify</Text>
-          </View>
+          </View> */}
 
           {/* Hero Section */}
           <View style={styles.heroSection}>
