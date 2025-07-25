@@ -2,24 +2,94 @@
 
 import { Ionicons } from "@expo/vector-icons"
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import axios from 'axios'
+import * as ImagePicker from 'expo-image-picker'
 import { LinearGradient } from "expo-linear-gradient"
 import { useRouter } from "expo-router"
-import { useState } from "react"
-import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { useEffect, useState } from "react"
+import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 
 const Profile = () => {
   const router = useRouter()
-  const [user] = useState({
-    name: "John Doe",
-    email: "john.doe@example.com",
-    phone: "+1 234 567 8900",
-    address: "123 Green Street, Eco City",
-    memberSince: "January 2023",
-    totalOrders: 45,
-    totalEarnings: "$2,450",
-    carbonSaved: "1.2 tons",
-  })
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [uploadStatus, setUploadStatus] = useState('');
+
+  const fetchProfile = async () => {
+    setLoading(true);
+    try {
+      const token = await AsyncStorage.getItem('userToken');
+      if (!token) {
+        router.replace('/(auth)/login');
+        return;
+      }
+      const response = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/profile`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      console.log(response.data.user);
+      setUser(response.data.user);
+    } catch (err) {
+      console.error('Failed to fetch profile', err);
+      Alert.alert('Error', 'Failed to fetch profile info. Please login again.');
+      router.replace('/(auth)/login');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  const handlePickImage = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permissionResult.granted) {
+      Alert.alert("Permission required", "Permission to access camera roll is required!");
+      return;
+    }
+
+    // Pick image
+    const pickerResult = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+    });
+
+    if (pickerResult.cancelled) return;
+
+  
+    const localUri = pickerResult.assets ? pickerResult.assets[0].uri : pickerResult.uri;
+    const filename = localUri.split('/').pop();
+    const match = /\.(\w+)$/.exec(filename ?? '');
+    const type = match ? `image/${match[1]}` : `image`;
+
+    const formData = new FormData();
+    formData.append('profilePic', { uri: localUri, name: filename, type });
+    formData.append('userId', user._id); 
+
+    try {
+      const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/upload-profile-pic`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${await AsyncStorage.getItem('userToken')}`,
+        },
+        body: formData,
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setUploadStatus('Upload successful!');
+        await fetchProfile();
+      } else {
+        setUploadStatus(data.error || 'Upload failed.');
+      }
+    } catch (err) {
+      setUploadStatus('Upload failed.');
+    }
+  };
 
   const menuItems = [
     {
@@ -69,23 +139,36 @@ const Profile = () => {
   const stats = [
     {
       icon: "bag-outline",
-      value: user.totalOrders,
+      value: user?.totalOrders,
       label: "Total Orders",
       color: "#4CAF50",
     },
     {
       icon: "cash-outline",
-      value: user.totalEarnings,
+      value: user?.totalEarnings,
       label: "Total Earnings",
       color: "#2196F3",
     },
     {
       icon: "leaf-outline",
-      value: user.carbonSaved,
+      value: user?.carbonSaved,
       label: "Carbon Saved",
       color: "#FF9800",
     },
   ]
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <LinearGradient colors={["#a8e6cf", "#ffffff"]} style={styles.gradient}>
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={{ fontSize: 18, color: '#065f46' }}>Loading profile...</Text>
+          </View>
+        </LinearGradient>
+      </SafeAreaView>
+    )
+  }
+  if (!user) return null
 
   return (
     <SafeAreaView style={styles.container}>
@@ -101,17 +184,25 @@ const Profile = () => {
             </TouchableOpacity>
             <Text style={styles.headerTitle}>My Profile</Text>
             <TouchableOpacity style={styles.editButton}>
-              <Ionicons name="create-outline" size={24} color="#2E7D32" />
+              {/* <Ionicons name="create-outline" size={24} color="#2E7D32" /> */}
             </TouchableOpacity>
           </View>
 
           {/* Profile Card */}
           <View style={styles.profileCard}>
             <View style={styles.avatarContainer}>
-              <View style={styles.avatar}>
-                <Ionicons name="person" size={40} color="#4CAF50" />
-              </View>
-              <TouchableOpacity style={styles.cameraButton}>
+              {user.profile_pic ? (
+                <Image
+                  source={{ uri: `${process.env.EXPO_PUBLIC_API_URL}/uploads/${user.profile_pic}` }}
+                  style={styles.avatar}
+                  resizeMode="cover"
+                />
+              ) : (
+                <View style={styles.avatar}>
+                  <Ionicons name="person" size={40} color="#4CAF50" />
+                </View>
+              )}
+              <TouchableOpacity style={styles.cameraButton} onPress={handlePickImage}>
                 <Ionicons name="camera" size={16} color="white" />
               </TouchableOpacity>
             </View>
@@ -258,6 +349,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderWidth: 3,
     borderColor: "#4CAF50",
+    overflow: 'hidden',
   },
   cameraButton: {
     position: "absolute",

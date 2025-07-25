@@ -52,7 +52,7 @@ export default function ForgotPassword() {
     const enteredOtp = otp.join("");
     setLoading(true);
     try {
-      await axios.post("http://192.168.1.10:9000/api/scrapify/forgot-password/verify-otp", { email, otp: enteredOtp });
+      await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/forgot-password/verify-otp`, { email, otp: enteredOtp });
       setOtpVerified(true);
       setStep(3);
       Alert.alert("OTP Verified", "You can now reset your password.");
@@ -66,7 +66,7 @@ export default function ForgotPassword() {
   const handleResetPassword = async (data) => {
     setLoading(true);
     try {
-      await axios.post("http://192.168.1.10:9000/api/scrapify/forgot-password/reset", {
+      await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/forgot-password/reset`, {
         email,
         otp: otp.join(""),
         newPassword: data.newPassword

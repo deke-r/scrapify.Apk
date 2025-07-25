@@ -7,6 +7,34 @@ const crypto = require('crypto');
 require('dotenv').config();
 const validator = require('validator');
 const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const path = require('path');
+
+
+function authenticate(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'No token provided' });
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) return res.status(403).json({ error: 'Invalid token' });
+    req.user = user;
+    next();
+  });
+}
+
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/'); 
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+    cb(null,uniqueSuffix + '-' + file.originalname)
+  }
+});
+
+const upload = multer({ storage: storage });
+
 
 router.get('/test', (req, res) => {
   res.json({ message: 'API is working!' });
@@ -257,6 +285,67 @@ router.post('/login', (req, res) => {
       res.json({ message: 'Login successful', user: { id: user.id, name: user.name, email: user.email, phone: user.phone }, token });
     }
   );
+});
+
+
+
+router.get('/profile', authenticate, (req, res) => {
+  const userId = req.user.id;
+  console.log(userId);
+  con.query(
+    `SELECT 
+        id, 
+        name, 
+        email, 
+        phone, 
+        profile_pic,
+        DATE_FORMAT(created_at, '%d/%m/%Y') AS memberSince
+     FROM users 
+     WHERE id = ?`,
+    [userId],
+    (err, results) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Server error' });
+      }
+      if (results.length === 0) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      res.json({ user: results[0] });
+    }
+  );
+});
+
+
+
+
+router.post('/upload-profile-pic',authenticate, upload.single('profilePic'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded' });
+  }
+  const userId = req.user.id;
+  if (!userId) {
+    return res.status(400).json({ error: 'User ID is required' });
+  }
+
+
+  const profilePicPath = req.file.filename;
+
+  // Update the user's profile_pic in the database
+  const sql = 'UPDATE users SET profile_pic = ? WHERE id = ?';
+  con.query(sql, [profilePicPath, userId], (err, result) => {
+    if (err) {
+      console.error('Error updating user profile picture:', err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.json({
+      message: 'Profile picture uploaded and user updated successfully',
+      profilePicUrl: profilePicPath
+    });
+  });
 });
 
 module.exports = router;
