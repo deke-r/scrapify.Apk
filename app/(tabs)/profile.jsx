@@ -5,8 +5,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import axios from 'axios'
 import * as ImagePicker from 'expo-image-picker'
 import { LinearGradient } from "expo-linear-gradient"
-import { useRouter } from "expo-router"
-import { useEffect, useState } from "react"
+import { useFocusEffect, useRouter } from "expo-router"
+import { useCallback, useEffect, useState } from "react"
 import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 
@@ -14,11 +14,17 @@ const Profile = () => {
   const router = useRouter()
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadStatus, setUploadStatus] = useState('');
 
-  const fetchProfile = async () => {
-    setLoading(true);
+  const fetchProfile = async (showLoading = false) => {
+    if (showLoading) {
+      setLoading(true);
+    } else {
+      setRefreshing(true);
+    }
+    
     try {
       const token = await AsyncStorage.getItem('userToken');
       if (!token) {
@@ -36,11 +42,23 @@ const Profile = () => {
       router.replace('/(auth)/login');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
+  // Use useFocusEffect to refresh data when screen comes into focus, but without showing loading screen
+  useFocusEffect(
+    useCallback(() => {
+      // Only refresh if user data already exists (not on initial load)
+      if (user) {
+        fetchProfile(false); // Refresh in background without loading screen
+      }
+    }, [user])
+  );
+
+  // Initial load only
   useEffect(() => {
-    fetchProfile();
+    fetchProfile(true); // Show loading screen for initial load
   }, []);
 
   const handlePickImage = async () => {
@@ -82,7 +100,7 @@ const Profile = () => {
       const data = await res.json();
       if (res.ok) {
         setUploadStatus('Upload successful!');
-        await fetchProfile();
+        await fetchProfile(false); // Refresh profile after upload without loading screen
       } else {
         setUploadStatus(data.error || 'Upload failed.');
       }
@@ -145,19 +163,19 @@ const Profile = () => {
   const stats = [
     {
       icon: "bag-outline",
-      value: user?.totalOrders,
+      value: user?.totalOrders || 0,
       label: "Total Orders",
       color: "#4CAF50",
     },
     {
       icon: "cash-outline",
-      value: user?.totalEarnings,
+      value: user?.totalEarnings || 0,
       label: "Total Earnings",
       color: "#2196F3",
     },
     {
       icon: "leaf-outline",
-      value: user?.carbonSaved,
+      value: user?.carbonSaved || 0,
       label: "Carbon Saved",
       color: "#FF9800",
     },
@@ -166,10 +184,17 @@ const Profile = () => {
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#4CAF50" />
-          <Text style={styles.loadingText}>Loading address information...</Text>
-        </View>
+        <LinearGradient 
+          colors={["#f8fafc", "#e8f5e8", "#ffffff"]} 
+          style={styles.gradient}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        >
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#4CAF50" />
+            <Text style={styles.loadingText}>Loading profile information...</Text>
+          </View>
+        </LinearGradient>
       </SafeAreaView>
     )
   }
@@ -242,7 +267,12 @@ const Profile = () => {
               </View>
               <View style={styles.infoItem}>
                 <Ionicons name="location-outline" size={20} color="#4CAF50" />
-                <Text style={styles.infoText}>{user.address}</Text>
+                <Text style={styles.infoText}>
+                  {user.addressData ? 
+                    `${user.addressData.street}, ${user.addressData.area}, ${user.addressData.city} - ${user.addressData.pincode}` :
+                    user.address || 'Address not set'
+                  }
+                </Text>
               </View>
             </View>
           </View>
@@ -306,6 +336,17 @@ const styles = StyleSheet.create({
   gradient: {
     flex: 1,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    fontFamily: "Poppins-Regular",
+    color: '#666',
+  },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -322,7 +363,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontFamily: "Poppins-Bold",
     color: "#2E7D32",
   },
   editButton: {
@@ -369,12 +410,13 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontFamily: "Poppins-Bold",
     color: "#333",
     marginBottom: 5,
   },
   userEmail: {
     fontSize: 16,
+    fontFamily: "Poppins-Regular",
     color: "#666",
     marginBottom: 15,
   },
@@ -388,6 +430,7 @@ const styles = StyleSheet.create({
   },
   memberText: {
     fontSize: 14,
+    fontFamily: "Poppins-Regular",
     color: "#666",
     marginLeft: 5,
   },
@@ -420,12 +463,13 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontFamily: "Poppins-Bold",
     color: "#333",
     marginBottom: 5,
   },
   statLabel: {
     fontSize: 12,
+    fontFamily: "Poppins-Regular",
     color: "#666",
     textAlign: "center",
   },
@@ -435,7 +479,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontFamily: "Poppins-Bold",
     color: "#2E7D32",
     marginBottom: 15,
   },
@@ -456,6 +500,7 @@ const styles = StyleSheet.create({
   },
   infoText: {
     fontSize: 16,
+    fontFamily: "Poppins-Regular",
     color: "#666",
     marginLeft: 15,
     flex: 1,
@@ -491,12 +536,13 @@ const styles = StyleSheet.create({
   },
   menuTitle: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontFamily: "Poppins-Bold",
     color: "#333",
     marginBottom: 3,
   },
   menuSubtitle: {
     fontSize: 14,
+    fontFamily: "Poppins-Regular",
     color: "#666",
   },
   logoutButton: {
@@ -513,7 +559,7 @@ const styles = StyleSheet.create({
   },
   logoutText: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontFamily: "Poppins-Bold",
     color: "#F44336",
     marginLeft: 10,
   },

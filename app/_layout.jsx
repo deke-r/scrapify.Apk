@@ -1,7 +1,32 @@
+import { useFonts } from 'expo-font';
 import { Stack } from "expo-router";
+import * as SplashScreen from 'expo-splash-screen';
+import { useEffect } from 'react';
 import './globals.css';
 
+// Keep the splash screen visible while we fetch resources
+SplashScreen.preventAutoHideAsync();
+
 export default function RootLayout() {
+  const [fontsLoaded, fontError] = useFonts({
+    'Poppins-Regular': require('../assets/fonts/Poppins-Regular.ttf'),
+    'Poppins-Medium': require('../assets/fonts/Poppins-Medium.ttf'),
+    'Poppins-SemiBold': require('../assets/fonts/Poppins-SemiBold.ttf'),
+    'Poppins-Bold': require('../assets/fonts/Poppins-Bold.ttf'),
+    'Poppins-ExtraBold': require('../assets/fonts/Poppins-ExtraBold.ttf'),
+    'Poppins-Black': require('../assets/fonts/Poppins-Black.ttf'),
+  });
+
+  useEffect(() => {
+    if (fontsLoaded || fontError) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, fontError]);
+
+  if (!fontsLoaded && !fontError) {
+    return null;
+  }
+
   return (
     <Stack>
       <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
@@ -13,7 +38,10 @@ export default function RootLayout() {
             headerBackTitleVisible: false,
             tabBarStyle: { display: 'none' },
             headerBackTitle: 'Back',
-            headerTitleStyle: { color: '#2E7D32' },
+            headerTitleStyle: { 
+              color: '#2E7D32',
+              fontFamily: 'Poppins-SemiBold',
+            },
             headerTintColor: '#2E7D32',
           }}
         />
@@ -24,12 +52,13 @@ export default function RootLayout() {
             headerBackTitleVisible: false,
             tabBarStyle: { display: 'none' },
             headerBackTitle: 'Back',
-            headerTitleStyle: { color: '#2E7D32' },
+            headerTitleStyle: { 
+              color: '#2E7D32',
+              fontFamily: 'Poppins-SemiBold',
+            },
             headerTintColor: '#2E7D32',
           }}
         />
-
-
     </Stack>
   );
 }
