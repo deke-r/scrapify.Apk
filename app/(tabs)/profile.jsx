@@ -7,7 +7,7 @@ import * as ImagePicker from 'expo-image-picker'
 import { LinearGradient } from "expo-linear-gradient"
 import { useRouter } from "expo-router"
 import { useEffect, useState } from "react"
-import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 
 const Profile = () => {
@@ -99,6 +99,12 @@ const Profile = () => {
       onPress: () => router.push('/edit-profile'),
     },
     {
+      icon: "location-outline",
+      title: "Edit Address",
+      subtitle: "Update your address information",
+      onPress: () => router.push('/edit-address'),
+    },
+    {
       icon: "list-outline",
       title: "My Orders",
       subtitle: "View your service history",
@@ -160,11 +166,10 @@ const Profile = () => {
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <LinearGradient colors={["#a8e6cf", "#ffffff"]} style={styles.gradient}>
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={{ fontSize: 18, color: '#065f46' }}>Loading profile...</Text>
-          </View>
-        </LinearGradient>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#4CAF50" />
+          <Text style={styles.loadingText}>Loading address information...</Text>
+        </View>
       </SafeAreaView>
     )
   }

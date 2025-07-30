@@ -291,7 +291,9 @@ router.post('/login', (req, res) => {
 
 router.get('/profile', authenticate, (req, res) => {
   const userId = req.user.id;
-  console.log(userId);
+  // console.log(userId);
+  
+  // Get user profile and address in parallel
   con.query(
     `SELECT 
         id, 
@@ -303,15 +305,40 @@ router.get('/profile', authenticate, (req, res) => {
      FROM users 
      WHERE id = ?`,
     [userId],
-    (err, results) => {
+    (err, userResults) => {
       if (err) {
         console.error(err);
         return res.status(500).json({ error: 'Server error' });
       }
-      if (results.length === 0) {
+      if (userResults.length === 0) {
         return res.status(404).json({ error: 'User not found' });
       }
-      res.json({ user: results[0] });
+
+      // Get user address
+      con.query(
+        'SELECT * FROM user_addresses WHERE user_id = ? ORDER BY created_at DESC LIMIT 1',
+        [userId],
+        (err, addressResults) => {
+          if (err) {
+            console.error('Error fetching address:', err);
+            // Return user data even if address fetch fails
+            return res.json({ user: userResults[0] });
+          }
+
+          const user = userResults[0];
+          if (addressResults.length > 0) {
+            // Combine address fields into a single string for backward compatibility
+            const address = addressResults[0];
+            user.address = `${address.street}, ${address.area}, ${address.city}, ${address.pincode}`;
+            user.addressData = address; // Include full address object
+          } else {
+            user.address = '';
+            user.addressData = null;
+          }
+
+          res.json({ user });
+        }
+      );
     }
   );
 });
@@ -390,5 +417,167 @@ router.put('/profile', authenticate, async (req, res) => {
   });
 });
 
+// Get user address
+router.get('/address', authenticate, (req, res) => {
+  const userId = req.user.id;
+  
+  con.query(
+    'SELECT * FROM user_addresses WHERE user_id = ? ORDER BY created_at DESC LIMIT 1',
+    [userId],
+    (err, results) => {
+      if (err) {
+        console.error('Error fetching address:', err);
+        return res.status(500).json({ error: 'Server error' });
+      }
+      
+      if (results.length === 0) {
+        return res.json({ address: null });
+      }
+      
+      res.json({ address: results[0] });
+    }
+  );
+});
+
+// Create or update user address
+router.post('/address', authenticate, (req, res) => {
+  const userId = req.user.id;
+  let { street, area, city, pincode } = req.body;
+
+  // Sanitize inputs
+  street = validator.trim(street || '');
+  area = validator.trim(area || '');
+  city = validator.trim(city || '');
+  pincode = validator.trim(pincode || '');
+
+  // Validate inputs
+  if (!street || !area || !city || !pincode) {
+    return res.status(400).json({ error: 'All address fields are required.' });
+  }
+
+  if (street.length < 3) {
+    return res.status(400).json({ error: 'Street address must be at least 3 characters.' });
+  }
+
+  if (area.length < 2) {
+    return res.status(400).json({ error: 'Area must be at least 2 characters.' });
+  }
+
+  if (!/^\d{6}$/.test(pincode)) {
+    return res.status(400).json({ error: 'Pincode must be exactly 6 digits.' });
+  }
+
+  // Check if user already has an address
+  con.query(
+    'SELECT id FROM user_addresses WHERE user_id = ?',
+    [userId],
+    (err, results) => {
+      if (err) {
+        console.error('Error checking existing address:', err);
+        return res.status(500).json({ error: 'Server error' });
+      }
+
+      if (results.length > 0) {
+        // Update existing address
+        const addressId = results[0].id;
+        con.query(
+          'UPDATE user_addresses SET street = ?, area = ?, city = ?, pincode = ?, updated_at = NOW() WHERE id = ?',
+          [street, area, city, pincode, addressId],
+          (err, result) => {
+            if (err) {
+              console.error('Error updating address:', err);
+              return res.status(500).json({ error: 'Server error' });
+            }
+            res.json({ 
+              success: true, 
+              message: 'Address updated successfully.',
+              address: { id: addressId, user_id: userId, street, area, city, pincode }
+            });
+          }
+        );
+      } else {
+        // Create new address
+        con.query(
+          'INSERT INTO user_addresses (user_id, street, area, city, pincode, created_at, updated_at) VALUES (?, ?, ?, ?, ?, NOW(), NOW())',
+          [userId, street, area, city, pincode],
+          (err, result) => {
+            if (err) {
+              console.error('Error creating address:', err);
+              return res.status(500).json({ error: 'Server error' });
+            }
+            res.json({ 
+              success: true, 
+              message: 'Address created successfully.',
+              address: { id: result.insertId, user_id: userId, street, area, city, pincode }
+            });
+          }
+        );
+      }
+    }
+  );
+});
+
+// Update user address (alternative route)
+router.put('/address', authenticate, (req, res) => {
+  const userId = req.user.id;
+  let { street, area, city, pincode } = req.body;
+
+  // Sanitize inputs
+  street = validator.trim(street || '');
+  area = validator.trim(area || '');
+  city = validator.trim(city || '');
+  pincode = validator.trim(pincode || '');
+
+  // Validate inputs
+  if (!street || !area || !city || !pincode) {
+    return res.status(400).json({ error: 'All address fields are required.' });
+  }
+
+  if (street.length < 3) {
+    return res.status(400).json({ error: 'Street address must be at least 3 characters.' });
+  }
+
+  if (area.length < 2) {
+    return res.status(400).json({ error: 'Area must be at least 2 characters.' });
+  }
+
+  if (!/^\d{6}$/.test(pincode)) {
+    return res.status(400).json({ error: 'Pincode must be exactly 6 digits.' });
+  }
+
+  // Check if user has an address to update
+  con.query(
+    'SELECT id FROM user_addresses WHERE user_id = ?',
+    [userId],
+    (err, results) => {
+      if (err) {
+        console.error('Error checking existing address:', err);
+        return res.status(500).json({ error: 'Server error' });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({ error: 'No address found for this user. Please create one first.' });
+      }
+
+      // Update existing address
+      const addressId = results[0].id;
+      con.query(
+        'UPDATE user_addresses SET street = ?, area = ?, city = ?, pincode = ?, updated_at = NOW() WHERE id = ?',
+        [street, area, city, pincode, addressId],
+        (err, result) => {
+          if (err) {
+            console.error('Error updating address:', err);
+            return res.status(500).json({ error: 'Server error' });
+          }
+          res.json({ 
+            success: true, 
+            message: 'Address updated successfully.',
+            address: { id: addressId, user_id: userId, street, area, city, pincode }
+          });
+        }
+      );
+    }
+  );
+});
 
 module.exports = router;
