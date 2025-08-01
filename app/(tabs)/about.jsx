@@ -188,7 +188,10 @@ const About = () => {
               <Text style={styles.ctaSubtitle}>
                 Join thousands of users who trust Scrapify for their waste management needs
               </Text>
-              <TouchableOpacity style={styles.ctaButton}>
+              <TouchableOpacity 
+                style={styles.ctaButton}
+                onPress={() => router.push("/contact-form")}
+              >
                 <Text style={styles.ctaButtonText}>Contact Us</Text>
                 <Ionicons name="arrow-forward" size={18} color="white" style={styles.ctaButtonIcon} />
               </TouchableOpacity>
@@ -244,7 +247,7 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
   },
   heroTitle: {
-    fontSize: 36,
+    fontSize: 24,
     fontFamily: "Poppins-Bold",
     color: "#1a202c",
     marginBottom: 16,
@@ -277,7 +280,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   sectionTitle: {
-    fontSize: 28,
+    fontSize: 24,
     fontFamily: "Poppins-Bold",
     color: "#1a202c",
     marginLeft: 12,
@@ -448,7 +451,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   ctaTitle: {
-    fontSize: 30,
+    fontSize: 24,
     fontFamily: "Poppins-Bold",
     color: "#1a202c",
     marginBottom: 16,

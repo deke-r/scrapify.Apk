@@ -3,22 +3,86 @@
 import { Ionicons } from "@expo/vector-icons"
 import { LinearGradient } from "expo-linear-gradient"
 import { useRouter } from "expo-router"
+import { useEffect, useRef, useState } from "react"
 import { Dimensions, Image, Platform, ScrollView, StatusBar, Text, TouchableOpacity, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
-import ServiceCard from "../../components/ServiceCard"
-import { services } from "../../components/servicesData"
 
 const { width } = Dimensions.get("window")
 
 export default function Index() {
   const router = useRouter()
+  const [currentSlide, setCurrentSlide] = useState(0)
+  const scrollViewRef = useRef(null)
 
   const stats = [
-    { number: "9999+", label: "Records Extracted" },
-    { number: "1140+", label: "Active Users" },
+    { number: "500+", label: "Records Extracted" },
+    { number: "50+", label: "Active Users" },
     { number: "100%", label: "System Up-Time" },
     { number: "24/7", label: "Support" },
   ]
+
+  const carouselData = [
+    {
+      id: 1,
+      title: "Scrap Dealing",
+      description: "Sell your scrap materials at best prices",
+      icon: "refresh",
+      color: "#4CAF50",
+      image: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=400&h=200&fit=crop"
+    },
+    {
+      id: 2,
+      title: "E-Waste Services",
+      description: "Safe disposal of electronic waste",
+      icon: "phone-portrait",
+      color: "#2196F3",
+      image: "https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?w=400&h=200&fit=crop"
+    },
+    {
+      id: 3,
+      title: "Demolition Services",
+      description: "Professional demolition services",
+      icon: "hammer",
+      color: "#FF9800",
+      image: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=400&h=200&fit=crop"
+    },
+    {
+      id: 4,
+      title: "Recycling Services",
+      description: "Transform waste into valuable resources",
+      icon: "leaf",
+      color: "#8BC34A",
+      image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=200&fit=crop"
+    }
+  ]
+
+  // Auto-scroll carousel
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const nextSlide = (currentSlide + 1) % carouselData.length
+      setCurrentSlide(nextSlide)
+      scrollViewRef.current?.scrollTo({
+        x: nextSlide * (width - 32),
+        animated: true
+      })
+    }, 3000) // Change slide every 3 seconds
+
+    return () => clearInterval(interval)
+  }, [currentSlide, carouselData.length])
+
+  const handleScroll = (event) => {
+    const slideSize = event.nativeEvent.layoutMeasurement.width
+    const index = event.nativeEvent.contentOffset.x / slideSize
+    setCurrentSlide(Math.round(index))
+  }
+
+  const scrollToSlide = (index) => {
+    setCurrentSlide(index)
+    scrollViewRef.current?.scrollTo({
+      x: index * (width - 32),
+      animated: true
+    })
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#a8e6cf",paddingBottom:-50 }}>
@@ -47,6 +111,136 @@ export default function Index() {
               style={{ width: 100, height: 100, resizeMode: "contain"}}
             />
 
+          </View>
+
+          {/* Carousel Section */}
+          <View style={{ marginTop: 20 }}>
+           
+            
+            <ScrollView
+              ref={scrollViewRef}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              onScroll={handleScroll}
+              scrollEventThrottle={16}
+              style={{ height: 250 }}
+              contentContainerStyle={{ paddingHorizontal: 16 }}
+            >
+              {carouselData.map((item, index) => (
+                <View key={item.id} style={{ width: width - 32 }}>
+                  <View style={{
+                    backgroundColor: "rgba(255, 255, 255, 0.9)",
+                    borderRadius: 20,
+                    height: 230,
+                    overflow: "hidden",
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4,
+                    elevation: 3,
+                    marginRight: 16,
+                  }}>
+                    {/* Background Image */}
+                    <Image
+                      source={{ uri: item.image }}
+                      style={{
+                        width: "100%",
+                        height: 140,
+                        resizeMode: "cover",
+                      }}
+                    />
+                    
+                    {/* Overlay with service info */}
+                    <View style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      backgroundColor: "rgba(0, 0, 0, 0.3)",
+                      justifyContent: "flex-end",
+                      padding: 20,
+                    }}>
+                      <View style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        marginBottom: 10,
+                      }}>
+                        <View style={[{
+                          width: 40,
+                          height: 40,
+                          borderRadius: 20,
+                          alignItems: "center",
+                          justifyContent: "center",
+                          marginRight: 10,
+                        }, { backgroundColor: item.color }]}>
+                          <Ionicons name={item.icon} size={20} color="white" />
+                        </View>
+                        <Text style={{
+                          fontSize: 18,
+                          fontWeight: "bold",
+                          color: "white",
+                          flex: 1,
+                        }}>
+                          {item.title}
+                        </Text>
+                      </View>
+                      
+                      <Text style={{
+                        fontSize: 14,
+                        color: "rgba(255, 255, 255, 0.9)",
+                        marginBottom: 15,
+                        lineHeight: 20,
+                      }}>
+                        {item.description}
+                      </Text>
+                      
+                      <TouchableOpacity
+                        onPress={() => router.push("/(tabs)/services")}
+                        style={{
+                          backgroundColor: item.color,
+                          borderRadius: 12,
+                          paddingHorizontal: 20,
+                          paddingVertical: 10,
+                          alignSelf: "flex-start",
+                        }}
+                      >
+                        <Text style={{
+                          color: "white",
+                          fontWeight: "600",
+                          fontSize: 14,
+                        }}>
+                          Book Now
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+              ))}
+            </ScrollView>
+
+            {/* Carousel Indicators */}
+            <View style={{
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+              marginTop: 15,
+            }}>
+              {carouselData.map((_, index) => (
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => scrollToSlide(index)}
+                  style={{
+                    width: 10,
+                    height: 10,
+                    borderRadius: 5,
+                    backgroundColor: currentSlide === index ? "#4CAF50" : "#ccc",
+                    marginHorizontal: 4,
+                  }}
+                />
+              ))}
+            </View>
           </View>
 
           {/* Quick Stats */}
@@ -163,29 +357,6 @@ export default function Index() {
               }}
             >
               <TouchableOpacity
-                onPress={() => router.push("/services")}
-                style={{
-                  backgroundColor: "#4CAF50",
-                  borderRadius: 16,
-                  padding: 20,
-                  alignItems: "center",
-                  flex: 1,
-                  marginRight: 8,
-                }}
-              >
-                <Ionicons name="add-circle" size={32} color="white" />
-                <Text
-                  style={{
-                    color: "white",
-                    fontWeight: "bold",
-                    marginTop: 8,
-                    textAlign: "center",
-                  }}
-                >
-                  Book Service
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
                 onPress={() => router.push("/profile")}
                 style={{
                   backgroundColor: "#2196F3",
@@ -193,7 +364,7 @@ export default function Index() {
                   padding: 20,
                   alignItems: "center",
                   flex: 1,
-                  marginLeft: 8,
+                  marginRight: 8,
                 }}
               >
                 <Ionicons name="person-circle" size={32} color="white" />
@@ -208,28 +379,31 @@ export default function Index() {
                   My Profile
                 </Text>
               </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => router.push("/my-orders")}
+                style={{
+                  backgroundColor: "#4CAF50",
+                  borderRadius: 16,
+                  padding: 20,
+                  alignItems: "center",
+                  flex: 1,
+                  marginLeft: 8,
+                }}
+              >
+                <Ionicons name="list-circle" size={32} color="white" />
+                <Text
+                  style={{
+                    color: "white",
+                    fontWeight: "bold",
+                    marginTop: 8,
+                    textAlign: "center",
+                  }}
+                >
+                  My Orders
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
-
-          {/* Services Section */}
-          <View
-            style={{
-              marginHorizontal: 16,
-              marginVertical: 10,
-            }}
-          >
-
-
-            {services.map((service, index) => (
-              <ServiceCard
-                key={index}
-                service={service}
-              />
-            ))}
-          </View>
-
-        
-         
 
           {/* Bottom Spacing */}
           <View style={{ height: 30 }} />

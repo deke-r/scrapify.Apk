@@ -150,7 +150,7 @@ const Profile = () => {
       icon: "help-circle-outline",
       title: "Help & Support",
       subtitle: "Get help and contact support",
-      onPress: () => Alert.alert("Help & Support", "Support feature coming soon!"),
+      onPress: () => router.push('/help-support'),
     },
     {
       icon: "settings-outline",

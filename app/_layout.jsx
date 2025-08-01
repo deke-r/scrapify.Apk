@@ -59,6 +59,48 @@ export default function RootLayout() {
             headerTintColor: '#2E7D32',
           }}
         />
+        <Stack.Screen
+          name="help-support"
+          options={{
+            title: 'Help & Support',
+            headerBackTitleVisible: false,
+            tabBarStyle: { display: 'none' },
+            headerBackTitle: 'Back',
+            headerTitleStyle: { 
+              color: '#2E7D32',
+              fontFamily: 'Poppins-SemiBold',
+            },
+            headerTintColor: '#2E7D32',
+          }}
+        />
+        <Stack.Screen
+          name="contact-form"
+          options={{
+            title: 'Contact Support',
+            headerBackTitleVisible: false,
+            tabBarStyle: { display: 'none' },
+            headerBackTitle: 'Back',
+            headerTitleStyle: { 
+              color: '#2E7D32',
+              fontFamily: 'Poppins-SemiBold',
+            },
+            headerTintColor: '#2E7D32',
+          }}
+        />
+        <Stack.Screen
+          name="book-service"
+          options={{
+            title: 'Book Service',
+            headerBackTitleVisible: false,
+            tabBarStyle: { display: 'none' },
+            headerBackTitle: 'Back',
+            headerTitleStyle: { 
+              color: '#2E7D32',
+              fontFamily: 'Poppins-SemiBold',
+            },
+            headerTintColor: '#2E7D32',
+          }}
+        />
     </Stack>
   );
 }

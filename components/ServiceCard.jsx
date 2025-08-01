@@ -1,11 +1,13 @@
 "use client"
 
 import { Ionicons } from "@expo/vector-icons"
+import { useRouter } from "expo-router"
 import { useState } from "react"
 import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 
 const ServiceCard = ({ service }) => {
+  const router = useRouter()
   const [selectedItems, setSelectedItems] = useState([])
   const [showItemModal, setShowItemModal] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
@@ -25,19 +27,14 @@ const ServiceCard = ({ service }) => {
       return
     }
 
-    Alert.alert(
-      "Service Booked!",
-      `You have selected ${selectedItems.length} items from ${service.title}. Our team will contact you shortly.`,
-      [
-        {
-          text: "OK",
-          onPress: () => {
-            setShowItemModal(false)
-            setSelectedItems([])
-          },
-        },
-      ],
-    )
+    // Navigate to booking page with selected items and service data
+    router.push({
+      pathname: '/book-service',
+      params: {
+        selectedItems: JSON.stringify(selectedItems),
+        selectedService: JSON.stringify(service)
+      }
+    })
   }
 
   const filteredItems = service.items.filter(
@@ -69,11 +66,17 @@ const ServiceCard = ({ service }) => {
       <Modal visible={showItemModal} animationType="slide" presentationStyle="pageSheet">
         <SafeAreaView style={styles.modalContainer}>
           <View style={styles.modalHeader}>
-            <TouchableOpacity onPress={() => setShowItemModal(false)}>
+            <TouchableOpacity onPress={() => {
+              setShowItemModal(false)
+              setSelectedItems([]) // Discard selection
+            }}>
               <Ionicons name="close" size={24} color="#2E7D32" />
             </TouchableOpacity>
             <Text style={styles.modalTitle}>{service.title}</Text>
-            <TouchableOpacity onPress={handleBookService}>
+            <TouchableOpacity onPress={() => {
+              setShowItemModal(false)
+              // Keep selection and go back
+            }}>
               <Text style={styles.doneButton}>Done</Text>
             </TouchableOpacity>
           </View>

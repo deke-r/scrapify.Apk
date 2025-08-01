@@ -126,20 +126,14 @@ const Services = () => {
       return
     }
 
-    Alert.alert(
-      "Service Booked!",
-      `You have selected ${selectedItems.length} items. Our team will contact you shortly.`,
-      [
-        {
-          text: "OK",
-          onPress: () => {
-            setShowItemModal(false)
-            setSelectedItems([])
-            setSelectedService(null)
-          },
-        },
-      ],
-    )
+    // Navigate to booking page with selected items and service data
+    router.push({
+      pathname: '/book-service',
+      params: {
+        selectedItems: JSON.stringify(selectedItems),
+        selectedService: JSON.stringify(selectedService)
+      }
+    })
   }
 
   const filteredItems =
@@ -173,7 +167,8 @@ const Services = () => {
 
           {/* Services Grid */}
           <View style={styles.servicesContainer}>
-            {/* <Text style={styles.sectionTitle}>Choose a Service</Text> */}
+            <Text style={styles.sectionTitle}>Choose a Service to Book</Text>
+            <Text style={styles.sectionSubtitle}>Select items from any service and book your pickup</Text>
             {services.map((service) => (
               <TouchableOpacity
                 key={service.id}
@@ -218,11 +213,18 @@ const Services = () => {
         <Modal visible={showItemModal} animationType="slide" presentationStyle="pageSheet">
           <SafeAreaView style={styles.modalContainer}>
             <View style={styles.modalHeader}>
-              <TouchableOpacity onPress={() => setShowItemModal(false)}>
+              <TouchableOpacity onPress={() => {
+                setShowItemModal(false)
+                setSelectedItems([]) // Discard selection
+                setSelectedService(null)
+              }}>
                 <Ionicons name="close" size={24} color="#2E7D32" />
               </TouchableOpacity>
               <Text style={styles.modalTitle}>{selectedService?.title}</Text>
-              <TouchableOpacity onPress={handleBookService}>
+              <TouchableOpacity onPress={() => {
+                setShowItemModal(false)
+                // Keep selection and go back to services list
+              }}>
                 <Text style={styles.doneButton}>Done</Text>
               </TouchableOpacity>
             </View>
@@ -343,6 +345,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#2E7D32",
     marginBottom: 20,
+    textAlign: "center",
+  },
+  sectionSubtitle: {
+    fontSize: 16,
+    color: "#666",
+    marginBottom: 10,
     textAlign: "center",
   },
   serviceCard: {
