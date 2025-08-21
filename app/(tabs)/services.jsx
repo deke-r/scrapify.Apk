@@ -14,6 +14,7 @@ const Services = () => {
   const [selectedItems, setSelectedItems] = useState([])
   const [showItemModal, setShowItemModal] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
+  const [selectedCategory, setSelectedCategory] = useState("All")
 
   // Auto-open modal for specific service if passed as parameter
   useEffect(() => {
@@ -106,6 +107,32 @@ const Services = () => {
     },
   ]
 
+  // Category icons mapping
+  const categoryIcons = {
+    "All": "grid-outline",
+    "Metal": "hardware-chip-outline",
+    "Paper": "document-text-outline",
+    "Plastic": "water-outline",
+    "Battery": "battery-charging-outline",
+    "Computer": "laptop-outline",
+    "Mobile": "phone-portrait-outline",
+    "Appliance": "tv-outline",
+    "Office": "business-outline",
+    "Residential": "home-outline",
+    "Commercial": "business-outline",
+    "Industrial": "factory-outline",
+    "Selective": "cut-outline",
+    "Concrete": "construct-outline",
+    "Wall": "square-outline",
+    "Assessment": "analytics-outline",
+    "Removal": "trash-outline",
+    "Cleanup": "brush-outline",
+    "Restoration": "refresh-outline",
+    "Glass": "wine-outline",
+    "Organic": "leaf-outline",
+    "Textile": "shirt-outline",
+  }
+
   const handleServiceSelect = (service) => {
     setSelectedService(service)
     setShowItemModal(true)
@@ -138,12 +165,19 @@ const Services = () => {
 
   const filteredItems =
     selectedService?.items.filter(
-      (item) =>
-        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.category.toLowerCase().includes(searchQuery.toLowerCase()),
+      (item) => {
+        const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            item.category.toLowerCase().includes(searchQuery.toLowerCase())
+        const matchesCategory = selectedCategory === "All" || item.category === selectedCategory
+        return matchesSearch && matchesCategory
+      }
     ) || []
 
-  const categories = selectedService ? [...new Set(selectedService.items.map((item) => item.category))] : []
+  const categories = selectedService ? ["All", ...new Set(selectedService.items.map((item) => item.category))] : []
+
+  const handleCategorySelect = (category) => {
+    setSelectedCategory(category)
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -241,13 +275,48 @@ const Services = () => {
             </View>
 
             {/* Categories */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoriesContainer}>
-              {categories.map((category, index) => (
-                <TouchableOpacity key={index} style={styles.categoryChip}>
-                  <Text style={styles.categoryText}>{category}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+            <View style={styles.categoriesSection}>
+              <Text style={styles.categoriesTitle}>Filter by Category</Text>
+              <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false} 
+                style={styles.categoriesContainer}
+                contentContainerStyle={styles.categoriesContent}
+              >
+                {categories.map((category, index) => {
+                  const isSelected = selectedCategory === category
+                  return (
+                    <TouchableOpacity 
+                      key={index} 
+                      style={[
+                        styles.categoryChip,
+                        isSelected && styles.selectedCategoryChip
+                      ]}
+                      onPress={() => handleCategorySelect(category)}
+                    >
+                      <View style={styles.categoryIconContainer}>
+                        <Ionicons 
+                          name={categoryIcons[category] || "pricetag-outline"} 
+                          size={16} 
+                          color={isSelected ? "white" : "#4CAF50"} 
+                        />
+                      </View>
+                      <Text style={[
+                        styles.categoryText,
+                        isSelected && styles.selectedCategoryText
+                      ]}>
+                        {category}
+                      </Text>
+                      {isSelected && (
+                        <View style={styles.selectedIndicator}>
+                          <Ionicons name="checkmark" size={12} color="white" />
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                  )
+                })}
+              </ScrollView>
+            </View>
 
             {/* Items List */}
             <ScrollView style={styles.itemsList}>
@@ -481,23 +550,86 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#333",
   },
-  categoriesContainer: {
+  categoriesSection: {
+    marginTop: 20,
+    marginBottom: 10,
+    paddingTop: 10, // Add padding to prevent clipping
+  },
+  categoriesTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#2E7D32",
+    marginBottom: 12,
     paddingHorizontal: 16,
-    paddingVertical: 15,
+  },
+  categoriesContainer: {
+    flexGrow: 0,
+  },
+  categoriesContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 8,
+    paddingTop: 10, // Add top padding to prevent clipping
   },
   categoryChip: {
-    backgroundColor: "rgba(76, 175, 80, 0.1)",
-    borderRadius: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    borderRadius: 25,
     paddingHorizontal: 16,
-    paddingVertical: 8,
-    marginRight: 10,
-    borderWidth: 1,
-    borderColor: "rgba(76, 175, 80, 0.3)",
+    paddingVertical: 12,
+    marginRight: 12,
+    borderWidth: 2,
+    borderColor: "rgba(76, 175, 80, 0.2)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    minWidth: 100,
+    justifyContent: "center",
+    position: "relative", // Ensure proper positioning context
+  },
+  selectedCategoryChip: {
+    backgroundColor: "#4CAF50",
+    borderColor: "#4CAF50",
+    shadowColor: "#4CAF50",
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+    transform: [{ scale: 1.05 }],
+  },
+  categoryIconContainer: {
+    marginRight: 8,
+    width: 20,
+    alignItems: "center",
   },
   categoryText: {
     color: "#4CAF50",
     fontSize: 14,
     fontWeight: "600",
+    textAlign: "center",
+  },
+  selectedCategoryText: {
+    color: "white",
+    fontWeight: "bold",
+  },
+  selectedIndicator: {
+    position: "absolute",
+    top: -8, // Adjusted from -5 to -8 for better positioning
+    right: -8, // Adjusted from -5 to -8 for better positioning
+    backgroundColor: "#FF6B6B",
+    borderRadius: 12, // Increased from 10 to 12
+    width: 24, // Increased from 20 to 24
+    height: 24, // Increased from 20 to 24
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: "white",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 3,
   },
   itemsList: {
     flex: 1,

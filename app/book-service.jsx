@@ -123,81 +123,67 @@ const BookService = () => {
     }
   }
 
-  const submitBooking = async (data) => {
-    if (!hasAddress) {
-      Alert.alert('Address Required', 'Please add your address to continue with the booking.', [
-        {
-          text: 'Add Address',
-          onPress: () => router.push('/edit-address')
-        },
-        {
-          text: 'Cancel',
-          style: 'cancel'
-        }
-      ])
-      return
+  const submitBooking = async () => {
+    if (!user?.addressData?.street) {
+      Alert.alert("Missing address", "Please add address in profile.");
+      return;
     }
-
+    if (!selectedService || selectedItems.length === 0) {
+      Alert.alert("Select a service and items first.");
+      return;
+    }
     if (images.length === 0) {
-      Alert.alert('Images Required', 'Please upload at least one image of your items.')
-      return
+      Alert.alert("Upload at least one image.");
+      return;
     }
 
-    setSaving(true)
+    setSaving(true);
     try {
-      const token = await AsyncStorage.getItem('userToken')
-      
-      // Create form data for multipart upload
-      const formData = new FormData()
-      formData.append('serviceId', selectedService.id)
-      formData.append('serviceTitle', selectedService.title)
-      formData.append('selectedItems', JSON.stringify(selectedItems))
-      formData.append('description', data.description || '')
-      
-      // Add images to form data
-      images.forEach((image, index) => {
-        const imageFile = {
-          uri: image.uri,
-          type: 'image/jpeg',
-          name: `image_${index}.jpg`
-        }
-        formData.append('images', imageFile)
-      })
+      const token = await AsyncStorage.getItem("userToken");
+      const formData = new FormData();
 
-      // Add address data
-      formData.append('street', data.street.trim())
-      formData.append('area', data.area.trim())
-      formData.append('city', data.city)
-      formData.append('pincode', data.pincode.trim())
+      formData.append("serviceId", selectedService.id);
+      formData.append("serviceTitle", selectedService.title);
+      formData.append("selectedItems", JSON.stringify(selectedItems));
+      formData.append("description", "");
 
-      const response = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/book-service`, 
+      const addr = user.addressData;
+      formData.append("street", addr.street?.trim() || "");
+      formData.append("area", addr.area?.trim() || "");
+      formData.append("city", addr.city || "");
+      formData.append("pincode", addr.pincode?.trim() || "");
+
+      images.forEach((img, idx) =>
+        formData.append("images", {
+          uri: img.uri,
+          type: "image/jpeg",
+          name: `img_${idx}.jpg`,
+        })
+      );
+
+      const resp = await axios.post(
+        `${process.env.EXPO_PUBLIC_API_URL}/book-service`,
         formData,
         {
-          headers: { 
+          headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data'
-          }
+          },
         }
-      )
-      
-      if (response.data.success) {
-        Alert.alert(
-          'Booking Successful!', 
-          'Your service has been booked. Our team will contact you shortly.',
-          [
-            {
-              text: 'OK',
-              onPress: () => router.replace('/(tabs)/index')
-            }
-          ]
-        )
+      );
+
+      if (resp.data.success) {
+        Alert.alert("Booked!", "Booking confirmed.", [
+          { text: "OK", onPress: () => router.replace("/(tabs)/") },
+        ]);
+      } else {
+        Alert.alert("Error", resp.data.error || "Unknown error");
       }
     } catch (err) {
-      Alert.alert('Error', err.response?.data?.message || 'Failed to submit booking')
+      Alert.alert("Error", err.response?.data?.error || err.message || "Failed to book");
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   if (loading) {
     return (
@@ -313,7 +299,7 @@ const BookService = () => {
           {/* Submit Button */}
           <TouchableOpacity 
             style={[styles.submitButton, saving && styles.submitButtonDisabled]}
-            onPress={() => submitBooking({ description })}
+            onPress={submitBooking} 
             disabled={saving}
           >
             {saving ? (

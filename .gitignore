@@ -7,7 +7,19 @@ scrapifyAppServer/node_modules
 
 scrapifyAppServer/.env
 
+.env*
+
+# Environment files
 .env
+.env.local
+.env.development
+.env.production
+.env.test
+
+
+/scrapifyAppServer/.env
+/scrapifyAppServer/node_modules
+/scrapifyAppServer/.env*
 
 # Expo
 .expo/
