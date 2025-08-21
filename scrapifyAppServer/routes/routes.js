@@ -1594,7 +1594,7 @@ router.get('/admin/reject-booking/:bookingId', (req, res) => {
                                           <br><br>
                                           <span style="color:#202020;font-family:helvetica;font-size:15px;line-height:24px"><strong>Need Help?</strong></span>
                                           <br>
-                                          <span style="color:#202020;font-family:helvetica;font-size:15px;line-height:24px">Call: +91 98765 43210 | Email: support@scrapify.com</span>
+                                          <span style="color:#202020;font-family:helvetica;font-size:15px;line-height:24px">Call: +91 98765 43210 | Email: info@scrapify.com</span>
                                           <br><br>
                                           <span style="color:#202020;font-family:helvetica;font-size:15px;line-height:24px">Thank you for considering Scrapify!</span>
                                           <br><br>
@@ -1613,19 +1613,19 @@ router.get('/admin/reject-booking/:bookingId', (req, res) => {
                             <tbody>
                               <tr>
                                 <td>
-                                  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="min-width:100%">
-                                    <tbody>
-                                      <tr>
-                                        <td valign="top" style="padding-top:10px">
-                                          <table align="left" width="100%" border="0" cellpadding="0" cellspacing="0" style="min-width:100%">
-                                            <tbody>
-                                              <tr>
-                                                <td valign="top" style="padding-right:0px;padding-left:0px;padding-top:0;padding-bottom:0">
-                                                  <img align="left" alt="Scrapify Logo" src="https://via.placeholder.com/65x25/333/fff?text=Scrapify" width="65" style="max-width:65px;padding-bottom:0;display:inline!important;vertical-align:bottom;height:25px">
-                                                </td>
-                                              </tr>
-                                            </tbody>
-                                          </table>
+                                  // <table border="0" cellpadding="0" cellspacing="0" width="100%" style="min-width:100%">
+                                  //   <tbody>
+                                  //     <tr>
+                                  //       <td valign="top" style="padding-top:10px">
+                                  //         <table align="left" width="100%" border="0" cellpadding="0" cellspacing="0" style="min-width:100%">
+                                  //           <tbody>
+                                  //             <tr>
+                                  //               <td valign="top" style="padding-right:0px;padding-left:0px;padding-top:0;padding-bottom:0">
+                                  //                 <img align="left" alt="Scrapify Logo" src="" width="65" style="max-width:65px;padding-bottom:0;display:inline!important;vertical-align:bottom;height:25px">
+                                  //               </td>
+                                  //             </tr>
+                                  //           </tbody>
+                                  //         </table>
                                         </td>
                                       </tr>
                                     </tbody>

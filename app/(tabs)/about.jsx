@@ -37,35 +37,36 @@ const About = () => {
   ]
 
   const stats = [
-    { number: "10M+", label: "Items Processed", icon: "analytics" },
-    { number: "50K+", label: "Happy Users", icon: "people" },
+    { number: "500+", label: "Items Processed", icon: "analytics" },
+    { number: "50+", label: "Happy Users", icon: "people" },
     { number: "99.9%", label: "Uptime", icon: "checkmark-circle" },
     { number: "24/7", label: "Support", icon: "headset" },
   ]
 
   const testimonials = [
     {
-      name: "Sarah Johnson",
-      company: "GreenTech Solutions",
+      name: "Rajesh Kumar",
+      company: "Delhi Metal Traders",
       rating: 5,
-      text: "Scrapify has revolutionized our waste management process. The platform is intuitive and has helped us increase our recycling efficiency by 40%.",
+      text: "Scrapify has transformed the way we handle our scrap materials. Their streamlined process has improved our efficiency and reduced costs significantly.",
       avatar: "person"
     },
     {
-      name: "Michael Chen",
-      company: "EcoCorp Industries",
+      name: "Priya Sharma",
+      company: "Eco Recyclers Pvt. Ltd.",
       rating: 5,
-      text: "Outstanding service and support! The real-time tracking feature has made our operations much more transparent and efficient.",
+      text: "Excellent service! The pickup and tracking system is reliable, and their team is always responsive and professional.",
       avatar: "person"
     },
     {
-      name: "Emily Rodriguez",
-      company: "Sustainable Living Co.",
+      name: "Amit Verma",
+      company: "Noida Industrial Solutions",
       rating: 5,
-      text: "As a small business, Scrapify has made waste management affordable and easy. The customer support team is incredibly helpful.",
+      text: "Scrapify has made our waste management seamless. The transparent pricing and quick support have been a big plus for our operations.",
       avatar: "person"
     },
   ]
+  
 
   const renderStars = (rating) => {
     return Array.from({ length: 5 }, (_, index) => (
