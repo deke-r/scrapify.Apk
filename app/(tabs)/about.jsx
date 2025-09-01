@@ -13,25 +13,25 @@ const About = () => {
     {
       icon: "flash",
       title: "Lightning Fast",
-      description: "Quick and efficient service delivery with real-time processing",
+      description: "Instant quotes and real-time processing. Sell your scrap in minutes with our quick and efficient service—no delays, no hassle.",
       color: "#FF6B35"
     },
     {
       icon: "shield-checkmark",
       title: "Secure & Reliable",
-      description: "99.9% uptime with enterprise-grade security protocols",
+      description: "99.9% uptime with trusted, transparent transactions. Backed by enterprise-grade security, we ensure every deal is safe and every pickup is on time.",
       color: "#4CAF50"
     },
     {
       icon: "settings",
       title: "Easy Integration",
-      description: "Simple setup and comprehensive technical support",
+      description: "Simple onboarding with full support.Whether you're an individual or a business, our platform plugs into your workflow with zero friction—and we’re here to help every step of the way.",
       color: "#2196F3"
     },
     {
       icon: "leaf",
       title: "Eco-Friendly",
-      description: "Sustainable and environmentally responsible solutions",
+      description: "Sustainable scrap solutions.We're committed to reducing landfill waste and promoting responsible recycling—good for you, better for the planet.",
       color: "#8BC34A"
     },
   ]
@@ -96,7 +96,7 @@ const About = () => {
             </View>
             <Text style={styles.heroTitle}>About Scrapify</Text>
             <Text style={styles.heroSubtitle}>
-              Empowering businesses and individuals with intelligent waste management solutions
+            Scrapify is your modern solution for sustainable waste management across India. We make recycling easy and rewarding by buying all types of scrap, from paper to electronics, right from your doorstep. With our user-friendly app, you can schedule pickups, get instant quotes, and contribute to a circular economy. Join us in transforming waste into wealth while building a cleaner, greener future!
             </Text>
             <View style={styles.heroDivider} />
           </View>
@@ -109,9 +109,7 @@ const About = () => {
             </View>
             <View style={styles.missionCard}>
               <Text style={styles.missionText}>
-                At Scrapify, we believe that waste should be transformed into valuable resources. Our mission is to
-                democratize waste management by providing powerful, user-friendly tools that make recycling and scrap
-                dealing simple, efficient, and profitable for everyone.
+              At Scrapify, we believe waste is a valuable resource waiting to be transformed. Our mission is to democratize waste management in India by providing user-friendly tools that make recycling and scrap collection simple, efficient, and profitable for everyone, while fostering a sustainable, cleaner future.
               </Text>
             </View>
           </View>
@@ -223,7 +221,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 40,
     paddingHorizontal: 24,
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    backgroundColor: "#ffffff",
     marginHorizontal: 16,
     marginTop: 20,
     borderRadius: 24,
@@ -288,7 +286,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.5,
   },
   missionCard: {
-    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    backgroundColor: "#ffffff",
     borderRadius: 20,
     padding: 28,
     shadowColor: "#000",
@@ -310,7 +308,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   featureCard: {
-    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    backgroundColor: "#ffffff",
     borderRadius: 20,
     padding: 24,
     marginBottom: 16,
@@ -353,7 +351,7 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
   },
   statCard: {
-    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    backgroundColor: "#ffffff",
     borderRadius: 16,
     padding: 24,
     alignItems: "center",
@@ -387,7 +385,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   testimonialCard: {
-    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    backgroundColor: "#ffffff",
     borderRadius: 20,
     padding: 24,
     marginBottom: 16,

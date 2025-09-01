@@ -92,15 +92,6 @@ const ServiceCard = ({ service }) => {
             />
           </View>
 
-          {/* Categories */}
-          {/* <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoriesContainer}>
-            {categories.map((category, index) => (
-              <TouchableOpacity key={index} style={styles.categoryChip}>
-                <Text style={styles.categoryText}>{category}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView> */}
-
           {/* Items List */}
           <ScrollView style={styles.itemsList}>
             {filteredItems.map((item) => {
@@ -141,7 +132,7 @@ export default ServiceCard
 const styles = StyleSheet.create({
   serviceCard: {
     flexDirection: "row",
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    backgroundColor: "#ffffff",
     borderRadius: 20,
     padding: 20,
     marginBottom: 15,
@@ -151,6 +142,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.3)",
   },
   serviceIcon: {
     width: 60,
@@ -159,6 +152,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginRight: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
   },
   serviceContent: {
     flex: 1,
@@ -176,7 +174,7 @@ const styles = StyleSheet.create({
   },
   itemCount: {
     fontSize: 12,
-    color: "#4CAF50",
+    color: "#228b22",
     fontWeight: "600",
   },
   modalContainer: {
@@ -196,12 +194,12 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#2E7D32",
+    color: "#228b22",
   },
   doneButton: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#4CAF50",
+    color: "#228b22",
   },
   searchContainer: {
     flexDirection: "row",
@@ -212,6 +210,13 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 15,
     paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: "#eee",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   searchInput: {
     flex: 1,
@@ -224,41 +229,43 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
   },
   categoryChip: {
-    backgroundColor: "rgba(76, 175, 80, 0.1)",
+    backgroundColor: "#ffffff",
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 8,
     marginRight: 10,
     borderWidth: 1,
-    borderColor: "rgba(76, 175, 80, 0.3)",
+    borderColor: "rgba(34, 139, 34, 0.3)",
   },
   categoryText: {
-    color: "#4CAF50",
+    color: "#228b22",
     fontSize: 14,
     fontWeight: "600",
   },
   itemsList: {
     flex: 1,
     paddingHorizontal: 16, 
-    marginVertical:20
+    marginVertical: 20
   },
   itemCard: {
     flexDirection: "row",
-    backgroundColor: "white",
+    backgroundColor: "#ffffff",
     borderRadius: 16,
     padding: 16,
     marginBottom: 10,
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    // shadowColor: "#000",
+    // shadowOffset: { width: 0, height: 1 },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 2,
+    // elevation: 2,
+    borderWidth: 1,
+    borderColor: "#f0f0f0",
   },
   selectedItemCard: {
     borderWidth: 2,
-    borderColor: "#4CAF50",
-    backgroundColor: "rgba(76, 175, 80, 0.05)",
+    borderColor: "#228b22",
+    backgroundColor: "#ffffff",
   },
   itemInfo: {
     flex: 1,
@@ -271,7 +278,7 @@ const styles = StyleSheet.create({
   },
   itemCategory: {
     fontSize: 12,
-    color: "#4CAF50",
+    color: "#228b22",
     marginBottom: 5,
     fontWeight: "600",
   },
@@ -290,11 +297,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   checkedBox: {
-    backgroundColor: "#4CAF50",
-    borderColor: "#4CAF50",
+    backgroundColor: "#228b22",
+    borderColor: "#228b22",
   },
   selectedCount: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: "#228b22",
     paddingVertical: 12,
     alignItems: "center",
   },

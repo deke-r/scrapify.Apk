@@ -58,6 +58,14 @@ export default function Layout() {
         }}
       />
       <Tabs.Screen
+        name="orders"
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="list-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="about"
         options={{
           tabBarIcon: ({ color, size }) => (

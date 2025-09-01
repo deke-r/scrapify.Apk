@@ -101,6 +101,20 @@ export default function RootLayout() {
             headerTintColor: '#2E7D32',
           }}
         />
+        <Stack.Screen
+          name="orders"
+          options={{
+            title: 'Orders',
+            headerBackTitleVisible: false,
+            tabBarStyle: { display: 'none' },
+            headerBackTitle: 'Back',
+            headerTitleStyle: { 
+              color: '#2E7D32',
+              fontFamily: 'Poppins-SemiBold',
+            },
+            headerTintColor: '#2E7D32',
+          }}
+        />
     </Stack>
   );
 }

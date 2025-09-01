@@ -3,12 +3,15 @@
 import { Ionicons } from "@expo/vector-icons"
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import axios from 'axios'
+import Constants from "expo-constants"
 import { LinearGradient } from "expo-linear-gradient"
 import { useRouter } from "expo-router"
 import { useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
+
+const API_URL = Constants.expoConfig.extra.apiUrl;
 
 const ContactForm = () => {
   const router = useRouter()
@@ -27,7 +30,7 @@ const ContactForm = () => {
     setSubmitting(true)
     try {
       const token = await AsyncStorage.getItem('userToken')
-      const response = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/contact-support`, data, {
+      const response = await axios.post(`${API_URL}/contact-support`, data, {
         headers: { Authorization: `Bearer ${token}` }
       })
       
@@ -258,7 +261,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingVertical: 15,
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    backgroundColor: "#ffffff",
     marginHorizontal: 16,
     marginTop: 10,
     borderRadius: 16,
@@ -288,7 +291,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   form: {
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    backgroundColor: "#ffffff",
     borderRadius: 20,
     padding: 24,
     shadowColor: "#000",

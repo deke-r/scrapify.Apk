@@ -3,12 +3,20 @@
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import axios from "axios"
 import { BlurView } from "expo-blur"
+import Constants from "expo-constants"
 import { LinearGradient } from "expo-linear-gradient"
 import { useRouter } from "expo-router"
 import { useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
+
+const API_URL = Constants.expoConfig.extra.apiUrl;
+
+// Debug logging for production builds
+console.log('Constants.expoConfig:', Constants.expoConfig);
+console.log('Constants.expoConfig.extra:', Constants.expoConfig?.extra);
+console.log('API_URL:', API_URL);
 
 export default function Login() {
   const router = useRouter()
@@ -23,7 +31,7 @@ export default function Login() {
   const onSubmit = async (data) => {
     setLoading(true)
     try {
-      const response = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/login`, {
+      const response = await axios.post(`${API_URL}/login`, {
         email: data.email,
         password: data.password
       });
@@ -155,14 +163,14 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255, 255, 255, 0.2)",
   },
   form: {
-    backgroundColor: "rgba(255, 255, 255, 0.4)",
+    backgroundColor: "#ffffff",
     borderRadius: 24,
     padding: 32,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.15,
     shadowRadius: 20,
-    elevation: 8,
+    // elevation: 8,
   },
   logoContainer: {
     alignItems: "center",
@@ -172,7 +180,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: "rgba(6, 95, 70, 0.1)",
+    backgroundColor: "#ffffff",
     borderWidth: 2,
     borderColor: "rgba(6, 95, 70, 0.3)",
     justifyContent: "center",
@@ -214,7 +222,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     fontSize: 16,
-    backgroundColor: "rgba(255, 255, 255, 0.6)",
+    backgroundColor: "#ffffff",
     color: "#065f46",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -224,7 +232,7 @@ const styles = StyleSheet.create({
   },
   inputError: {
     borderColor: "rgba(239, 68, 68, 0.6)",
-    backgroundColor: "rgba(239, 68, 68, 0.1)",
+    backgroundColor: "#ffffff",
   },
   errorText: {
     color: "#dc2626",

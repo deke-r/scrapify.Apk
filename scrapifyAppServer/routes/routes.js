@@ -764,138 +764,6 @@ router.post('/contact-support', authenticate, (req, res) => {
 });
 
 // Book service with image upload
-// router.post(
-//   '/book-service',
-//   authenticate,
-//   upload.array('images', 10),
-//   (req, res) => {
-//     console.log('Body:', req.body);
-//     console.log('Files:', req.files);
-
-
-   
-//     const {
-//       serviceId,
-//       serviceTitle,
-//       selectedItems,
-//       description = '',
-//       street,
-//       area,
-//       city,
-//       pincode
-//     } = req.body;
-
-//     if (!serviceId || !serviceTitle || !selectedItems) {
-//       return res
-//         .status(400)
-//         .json({ error: 'Service details and selected items are required.' });
-//     }
-
-//     let parsedItems;
-//     try {
-//       parsedItems = JSON.parse(selectedItems);
-//       if (!Array.isArray(parsedItems) || parsedItems.length === 0) {
-//         throw new Error();
-//       }
-//     } catch {
-//       return res
-//         .status(400)
-//         .json({ error: 'Invalid selected items format.' });
-//     }
-
-//     con.query(
-//       `INSERT INTO service_bookings 
-//        (user_id, service_id, service_title, selected_items, description, status, created_at, updated_at) 
-//        VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())`,
-//       [
-//         req.user.id,
-//         serviceId,
-//         serviceTitle,
-//         JSON.stringify(parsedItems),
-//         description,
-//         'pending'
-//       ],
-//       (err, result) => {
-//         if (err) {
-//           console.error('DB Error creating booking:', err);
-//           return res.status(500).json({ error: 'Server error' });
-//         }
-
-//         const bookingId = result.insertId;
-
-//         if (req.files?.length) {
-//           const imageValues = req.files.map(file => [
-//             bookingId,
-//             file.filename,
-//             file.path
-//           ]);
-//           con.query(
-//             'INSERT INTO booking_images (booking_id, filename, file_path) VALUES ?',
-//             [imageValues],
-//             err2 => {
-//               if (err2) console.error('Image Save Error:', err2);
-//             }
-//           );
-//         }
-
-//         const transporter = nodemailer.createTransport({
-//           service: 'gmail',
-//           auth: {
-//             user: process.env.MAIL_USER,
-//             pass: process.env.MAIL_PASS
-//           }
-//         });
-
-//         const itemsList = parsedItems
-//           .map(i => `${i.name} (${i.price})`)
-//           .join(', ');
-
-//         const salesMail = {
-//           from: `"Scrapify" <${process.env.MAIL_USER}>`,
-//           to: process.env.SALES_MAIL,
-//           subject: `🆕 New Service Booking - #${bookingId}`,
-//           html: `
-//             <h2>New Booking Received</h2>
-//             <p><b>Customer:</b> ${req.user.name} (${req.user.email})</p>
-//             <p><b>Service:</b> ${serviceTitle}</p>
-//             <p><b>Items:</b> ${itemsList}</p>
-//             <p><b>Description:</b> ${description || 'N/A'}</p>
-//             <p><b>Address:</b> ${street}, ${area}, ${city} - ${pincode}</p>
-//             <p><b>Status:</b> Pending</p>
-//           `
-//         };
-
-//         const customerMail = {
-//           from: `"Scrapify" <${process.env.MAIL_USER}>`,
-//           to: req.user.email,
-//           subject: `Service Booking Confirmed - #${bookingId}`,
-//           html: `
-//             <h2>✅ Your booking is confirmed!</h2>
-//             <p><b>Service:</b> ${serviceTitle}</p>
-//             <p><b>Items:</b> ${parsedItems.length} selected</p>
-//             <p><b>Status:</b> Pending</p>
-//             <p>Our team will contact you within 24 hours for pickup.</p>
-//           `
-//         };
-
-//         transporter.sendMail(salesMail, errMail =>
-//           errMail && console.error('Sales Mail Error:', errMail)
-//         );
-//         transporter.sendMail(customerMail, errMail =>
-//           errMail && console.error('Customer Mail Error:', errMail)
-//         );
-
-//         return res.json({
-//           success: true,
-//           message:
-//             'Service booked successfully. Emails sent to customer and sales team.',
-//           bookingId
-//         });
-//       }
-//     );
-//   }
-// );
-
 router.post('/book-service', authenticate, upload.array('images', 10), (req, res) => {
   console.log('Body:', req.body);
   console.log('Files:', req.files);
@@ -927,25 +795,10 @@ router.post('/book-service', authenticate, upload.array('images', 10), (req, res
   const bookingTime = new Date().toTimeString().split(' ')[0]; // HH:MM:SS
   const fullAddress = `${street}, ${area}, ${city} - ${pincode}`;
 
-  // First save address if provided
-  let addressId = null;
-  if (street && area && city && pincode) {
-    con.query(
-      'INSERT INTO user_addresses (user_id, street, area, city, pincode) VALUES (?, ?, ?, ?, ?)',
-      [req.user.id, street, area, city, pincode],
-      (err, result) => {
-        if (err) {
-          console.error('Address Save Error:', err);
-        } else {
-          addressId = result.insertId;
-        }
-      }
-    );
-  }
-
+  // FIXED: Match the actual database schema
   con.query(
     `INSERT INTO service_bookings 
-     (user_id, service_id, service_title, selected_items, description, booking_date, booking_time, address_id, status, created_at, updated_at) 
+     (user_id, service_id, service_title, selected_items, description, booking_date, booking_time, address, status, created_at, updated_at) 
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
     [
       req.user.id,
@@ -955,7 +808,7 @@ router.post('/book-service', authenticate, upload.array('images', 10), (req, res
       description,
       bookingDate,
       bookingTime,
-      addressId,
+      fullAddress, // Store full address as text
       'pending'
     ],
     (err, result) => {
@@ -966,13 +819,24 @@ router.post('/book-service', authenticate, upload.array('images', 10), (req, res
 
       const bookingId = result.insertId;
 
-      // Save images if any
+      // FIXED: Save address to order_addresses table
+      if (street && area && city && pincode) {
+        con.query(
+          'INSERT INTO order_addresses (booking_id, street, area, city, pincode, created_at) VALUES (?, ?, ?, ?, ?, NOW())',
+          [bookingId, street, area, city, pincode],
+          (err2) => {
+            if (err2) console.error('Address Save Error:', err2);
+          }
+        );
+      }
+
+      // FIXED: Save images with correct schema
       if (req.files?.length) {
         const imageValues = req.files.map(file => [
           bookingId, 
-          file.filename, 
-          `uploads/${file.filename}`,
-          new Date()
+          file.filename, // image_url
+          `uploads/${file.filename}`, // file_path
+          new Date() // uploaded_at
         ]);
         con.query(
           'INSERT INTO booking_images (booking_id, image_url, file_path, uploaded_at) VALUES ?',
@@ -1650,6 +1514,93 @@ router.get('/admin/reject-booking/:bookingId', (req, res) => {
           res.json({ success: true, message: 'Booking rejected successfully.' });
         }
       );
+    }
+  );
+});
+
+// Get user orders
+router.get('/orders', authenticate, (req, res) => {
+  const userId = req.user.id;
+  
+  con.query(
+    `SELECT 
+      sb.id,
+      sb.service_title,
+      sb.selected_items,
+      sb.description,
+      sb.status,
+      sb.booking_date,
+      sb.booking_time,
+      sb.created_at,
+      sb.updated_at,
+      ua.street,
+      ua.area,
+      ua.city,
+      ua.pincode,
+      GROUP_CONCAT(bi.file_path) as images
+    FROM service_bookings sb
+    LEFT JOIN user_addresses ua ON sb.address_id = ua.id
+    LEFT JOIN booking_images bi ON sb.id = bi.booking_id
+    WHERE sb.user_id = ?
+    GROUP BY sb.id
+    ORDER BY sb.created_at DESC`,
+    [userId],
+    (err, results) => {
+      if (err) {
+        console.error('Error fetching orders:', err);
+        return res.status(500).json({ error: 'Failed to fetch orders' });
+      }
+      
+      // Process results to format data properly
+      const orders = results.map(order => ({
+        id: order.id,
+        serviceTitle: order.service_title,
+        selectedItems: JSON.parse(order.selected_items || '[]'),
+        description: order.description,
+        status: order.status,
+        bookingDate: order.booking_date,
+        bookingTime: order.booking_time,
+        createdAt: order.created_at,
+        updatedAt: order.updated_at,
+        address: {
+          street: order.street,
+          area: order.area,
+          city: order.city,
+          pincode: order.pincode
+        },
+        images: order.images ? order.images.split(',').map(img => img.trim()) : []
+      }));
+      
+      res.json({ success: true, orders });
+    }
+  );
+});
+
+// Update order status (for admin use)
+router.patch('/orders/:orderId/status', authenticate, (req, res) => {
+  const { orderId } = req.params;
+  const { status } = req.body;
+  
+  // Validate status
+  const validStatuses = ['pending', 'confirmed', 'in_progress', 'completed', 'cancelled'];
+  if (!validStatuses.includes(status)) {
+    return res.status(400).json({ error: 'Invalid status' });
+  }
+  
+  con.query(
+    'UPDATE service_bookings SET status = ?, updated_at = NOW() WHERE id = ? AND user_id = ?',
+    [status, orderId, req.user.id],
+    (err, result) => {
+      if (err) {
+        console.error('Error updating order status:', err);
+        return res.status(500).json({ error: 'Failed to update order status' });
+      }
+      
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: 'Order not found' });
+      }
+      
+      res.json({ success: true, message: 'Order status updated successfully' });
     }
   );
 });

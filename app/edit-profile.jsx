@@ -3,11 +3,14 @@
 import { Ionicons } from "@expo/vector-icons"
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import axios from 'axios'
+import Constants from "expo-constants"
 import { LinearGradient } from "expo-linear-gradient"
 import { useRouter } from "expo-router"
 import { useEffect, useState } from "react"
-import { ActivityIndicator, Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
+import { ActivityIndicator, Alert, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
+
+const API_URL = Constants.expoConfig.extra.apiUrl;
 
 const EditProfile = () => {
   const router = useRouter()
@@ -27,7 +30,7 @@ const EditProfile = () => {
           router.replace('/(auth)/login')
           return
         }
-        const response = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/profile`, {
+        const response = await axios.get(`${API_URL}/profile`, {
           headers: { Authorization: `Bearer ${token}` }
         })
         setUser(response.data.user)
@@ -49,7 +52,7 @@ const EditProfile = () => {
       const token = await AsyncStorage.getItem('userToken')
       const payload = { name, phone }
       if (password) payload.password = password
-      const response = await axios.put(`${process.env.EXPO_PUBLIC_API_URL}/profile`, payload, {
+      const response = await axios.put(`${API_URL}/profile`, payload, {
         headers: { Authorization: `Bearer ${token}` }
       })
       if (response.data.success) {
@@ -100,6 +103,11 @@ const EditProfile = () => {
         end={{ x: 1, y: 1 }}
       >
    
+   <ScrollView 
+          style={styles.scrollContainer}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
 
         {/* Form Container */}
         <View style={styles.formContainer}>
@@ -184,6 +192,8 @@ const EditProfile = () => {
             </TouchableOpacity>
           </View>
         </View>
+
+        </ScrollView>
       </LinearGradient>
     </SafeAreaView>
   )
@@ -195,7 +205,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f8fafc",
-    marginTop:-50
+    paddingTop: Platform.OS === 'android' ? (-10) : (-50)
+  },
+  scrollContainer: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 40,
   },
   gradient: {
     flex: 1,
@@ -217,7 +233,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingVertical: 15,
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    backgroundColor: "#ffffff",
     marginHorizontal: 16,
     marginTop: 10,
     borderRadius: 16,
@@ -244,7 +260,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   form: {
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    backgroundColor: "#ffffff",
     borderRadius: 20,
     padding: 24,
     shadowColor: "#000",

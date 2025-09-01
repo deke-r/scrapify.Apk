@@ -3,12 +3,15 @@
 import { Ionicons } from "@expo/vector-icons"
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import axios from 'axios'
+import Constants from "expo-constants"
 import * as ImagePicker from 'expo-image-picker'
 import { LinearGradient } from "expo-linear-gradient"
 import { useFocusEffect, useRouter } from "expo-router"
 import { useCallback, useEffect, useState } from "react"
 import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
+
+const API_URL = Constants.expoConfig.extra.apiUrl;
 
 const Profile = () => {
   const router = useRouter()
@@ -31,10 +34,10 @@ const Profile = () => {
         router.replace('/(auth)/login');
         return;
       }
-      const response = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/profile`, {
+      const response = await axios.get(`${API_URL}/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      console.log(response.data.user);
+      // console.log(response.data.user);
       setUser(response.data.user);
     } catch (err) {
       console.error('Failed to fetch profile', err);
@@ -89,7 +92,7 @@ const Profile = () => {
     formData.append('userId', user._id); 
 
     try {
-      const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/upload-profile-pic`, {
+      const res = await fetch(`${API_URL}/upload-profile-pic`, {
         method: 'POST',
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -126,7 +129,7 @@ const Profile = () => {
       icon: "list-outline",
       title: "My Orders",
       subtitle: "View your service history",
-      onPress: () => Alert.alert("My Orders", "Order history feature coming soon!"),
+      onPress: () => router.push('/orders'),
     },
     {
       icon: "wallet-outline",
@@ -223,7 +226,7 @@ const Profile = () => {
             <View style={styles.avatarContainer}>
               {user.profile_pic ? (
                 <Image
-                  source={{ uri: `${process.env.EXPO_PUBLIC_API_URL}/uploads/${user.profile_pic}` }}
+                  source={{ uri: `${API_URL}/uploads/${user.profile_pic}` }}
                   style={styles.avatar}
                   resizeMode="cover"
                 />
@@ -353,7 +356,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 15,
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    backgroundColor: "#ffffff",
     marginHorizontal: 16,
     marginTop: 10,
     borderRadius: 16,
@@ -370,7 +373,7 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   profileCard: {
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    backgroundColor: "#ffffff",
     marginHorizontal: 16,
     marginTop: 20,
     borderRadius: 20,
@@ -390,7 +393,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: "rgba(76, 175, 80, 0.1)",
+    backgroundColor: "#ffffff",
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 3,
@@ -423,7 +426,7 @@ const styles = StyleSheet.create({
   memberBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255, 215, 0, 0.1)",
+    backgroundColor: "#ffffff",
     paddingHorizontal: 15,
     paddingVertical: 8,
     borderRadius: 20,
@@ -441,7 +444,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   statCard: {
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    backgroundColor: "#ffffff",
     borderRadius: 16,
     padding: 20,
     alignItems: "center",
@@ -484,7 +487,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   infoCard: {
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    backgroundColor: "#ffffff",
     borderRadius: 16,
     padding: 20,
     shadowColor: "#000",
@@ -512,7 +515,7 @@ const styles = StyleSheet.create({
   menuItem: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    backgroundColor: "#ffffff",
     borderRadius: 16,
     padding: 20,
     marginBottom: 10,
@@ -526,7 +529,7 @@ const styles = StyleSheet.create({
     width: 45,
     height: 45,
     borderRadius: 22.5,
-    backgroundColor: "rgba(76, 175, 80, 0.1)",
+    backgroundColor: "#ffffff",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 15,
@@ -549,7 +552,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(244, 67, 54, 0.1)",
+    backgroundColor: "#ffffff",
     marginHorizontal: 16,
     marginTop: 20,
     borderRadius: 16,

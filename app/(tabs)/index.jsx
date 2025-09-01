@@ -96,7 +96,7 @@ export default function Index() {
        
           <View
             style={{
-              backgroundColor: "rgba(255, 255, 255, 0.6)",
+              backgroundColor: "#ffffff",
               borderColor: "rgba(255, 255, 255, 0.9)",
               borderWidth: 1,
               marginHorizontal: 16,
@@ -261,7 +261,7 @@ export default function Index() {
                 <View
                   key={index}
                   style={{
-                    backgroundColor: "rgba(255, 255, 255, 0.8)",
+                    backgroundColor: "#ffffff",
                     borderRadius: 16,
                     padding: 15,
                     alignItems: "center",
@@ -306,7 +306,7 @@ export default function Index() {
                 <View
                   key={index + 2}
                   style={{
-                    backgroundColor: "rgba(255, 255, 255, 0.8)",
+                    backgroundColor: "#ffffff",
                     borderRadius: 16,
                     padding: 15,
                     alignItems: "center",
@@ -380,7 +380,7 @@ export default function Index() {
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => router.push("/my-orders")}
+                onPress={() => router.push("/orders")}
                 style={{
                   backgroundColor: "#4CAF50",
                   borderRadius: 16,

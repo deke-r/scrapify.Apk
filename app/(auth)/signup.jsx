@@ -2,12 +2,15 @@
 
 import axios from "axios"
 import { BlurView } from "expo-blur"
+import Constants from "expo-constants"
 import { LinearGradient } from "expo-linear-gradient"
 import { useRouter } from "expo-router"
 import { useRef, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { Alert, Image, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
+
+const API_URL = Constants.expoConfig.extra.apiUrl;
 
 export default function Signup() {
   const router = useRouter()
@@ -31,7 +34,7 @@ export default function Signup() {
 const onSubmitSignup = async (data) => {
   setLoading(true);
   try {
-    await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/send-otp`, { email: data.email });
+    await axios.post(`${API_URL}/send-otp`, { email: data.email });
     setUserData(data);
     setStep(2);
     Alert.alert('OTP Sent', 'Check your email for the OTP.');
@@ -64,11 +67,11 @@ const onSubmitSignup = async (data) => {
 const handleVerifyOtp = async () => {
   const enteredOtp = otp.join('');
   try {
-    await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/verify-otp`, {
+    await axios.post(`${API_URL}/verify-otp`, {
       email: userData.email,
       otp: enteredOtp
     });
-    await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/signup`, userData);
+    await axios.post(`${API_URL}/signup`, userData);
     Alert.alert('Success', 'Account created!');
     router.push('/login');
   } catch (err) {
@@ -342,7 +345,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     fontSize: 16,
-    backgroundColor: "rgba(255, 255, 255, 0.6)",
+    backgroundColor: "#ffffff",
     color: "#065f46",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -352,7 +355,7 @@ const styles = StyleSheet.create({
   },
   inputError: {
     borderColor: "rgba(239, 68, 68, 0.6)",
-    backgroundColor: "rgba(239, 68, 68, 0.1)",
+    backgroundColor: "#ffffff",
   },
   errorText: {
     color: "#dc2626",
@@ -377,7 +380,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     fontSize: 24,
     fontWeight: "600",
-    backgroundColor: "rgba(255, 255, 255, 0.6)",
+    backgroundColor: "#ffffff",
     color: "#065f46",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },

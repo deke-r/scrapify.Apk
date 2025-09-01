@@ -6,6 +6,8 @@ import { useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Alert, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import DebugScreen from "../../DebugScreen";
+import { API_URL } from "../../config";
 
 export default function ForgotPassword() {
   const router = useRouter();
@@ -21,7 +23,7 @@ export default function ForgotPassword() {
   const handleSendOtp = async (data) => {
     setLoading(true);
     try {
-      await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/forgot-password/send-otp`, { email: data.email });
+      await axios.post(`${API_URL}/forgot-password/send-otp`, { email: data.email });
       setEmail(data.email);
       setOtpSent(true);
       setStep(2);
@@ -52,7 +54,7 @@ export default function ForgotPassword() {
     const enteredOtp = otp.join("");
     setLoading(true);
     try {
-      await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/forgot-password/verify-otp`, { email, otp: enteredOtp });
+      await axios.post(`${API_URL}/forgot-password/verify-otp`, { email, otp: enteredOtp });
       setOtpVerified(true);
       setStep(3);
       Alert.alert("OTP Verified", "You can now reset your password.");
@@ -66,7 +68,7 @@ export default function ForgotPassword() {
   const handleResetPassword = async (data) => {
     setLoading(true);
     try {
-      await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/forgot-password/reset`, {
+      await axios.post(`${API_URL}/forgot-password/reset`, {
         email,
         otp: otp.join(""),
         newPassword: data.newPassword
@@ -194,6 +196,9 @@ export default function ForgotPassword() {
                       </TouchableOpacity>
                     </>
                   )}
+                  
+                  {/* Debug Screen - Only visible in production builds for troubleshooting */}
+                  <DebugScreen />
                 </View>
               </BlurView>
             </View>
@@ -209,15 +214,15 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, justifyContent: "center" },
   formContainer: { marginHorizontal: 24 },
   glassContainer: { borderRadius: 24, overflow: "hidden", borderWidth: 1, borderColor: "rgba(255, 255, 255, 0.2)" },
-  form: { backgroundColor: "rgba(255, 255, 255, 0.4)", borderRadius: 24, padding: 32, shadowColor: "#000", shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.15, shadowRadius: 20, elevation: 8 },
+  form: { backgroundColor: "rgba(255, 255, 255, 0.4)", borderRadius: 24, padding: 32, shadowColor: "#000", shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.15, shadowRadius: 20,  },
   title: { fontSize: 32, fontWeight: "700", color: "#065f46", marginBottom: 8, textAlign: "center", textShadowColor: "rgba(255, 255, 255, 0.3)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 },
   subtitle: { fontSize: 16, color: "#047857", marginBottom: 32, textAlign: "center" },
   inputContainer: { marginBottom: 16 },
-  input: { borderWidth: 1, borderColor: "rgba(6, 95, 70, 0.3)", borderRadius: 16, padding: 16, fontSize: 16, backgroundColor: "rgba(255, 255, 255, 0.6)", color: "#065f46", shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 },
-  inputError: { borderColor: "rgba(239, 68, 68, 0.6)", backgroundColor: "rgba(239, 68, 68, 0.1)" },
+  input: { borderWidth: 1, borderColor: "rgba(6, 95, 70, 0.3)", borderRadius: 16, padding: 16, fontSize: 16, backgroundColor: "#ffffff", color: "#065f46", shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 },
+  inputError: { borderColor: "rgba(239, 68, 68, 0.6)", backgroundColor: "#ffffff" },
   errorText: { color: "#dc2626", marginBottom: 8, fontSize: 13, marginLeft: 4, textShadowColor: "rgba(255, 255, 255, 0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 1 },
   otpContainer: { flexDirection: "row", justifyContent: "space-between", marginBottom: 32, paddingHorizontal: 20 },
-  otpInput: { width: 60, height: 60, borderWidth: 2, borderColor: "rgba(6, 95, 70, 0.3)", borderRadius: 16, fontSize: 24, fontWeight: "600", backgroundColor: "rgba(255, 255, 255, 0.6)", color: "#065f46", shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 },
+  otpInput: { width: 60, height: 60, borderWidth: 2, borderColor: "rgba(6, 95, 70, 0.3)", borderRadius: 16, fontSize: 24, fontWeight: "600", backgroundColor: "#ffffff", color: "#065f46", shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 },
   button: { borderRadius: 16, marginTop: 8, marginBottom: 24, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8, elevation: 4 },
   buttonDisabled: { opacity: 0.7 },
   buttonGradient: { padding: 16, borderRadius: 16, alignItems: "center" },

@@ -27,6 +27,16 @@ const Services = () => {
     }
   }, [params.selectedService])
 
+  // Debug logging for state values
+  useEffect(() => {
+    console.log('🔍 Services component state:', {
+      selectedService: selectedService?.title,
+      selectedItemsCount: selectedItems.length,
+      selectedItems: selectedItems,
+      showItemModal
+    });
+  }, [selectedService, selectedItems, showItemModal]);
+
   const services = [
     {
       id: 1,
@@ -148,19 +158,33 @@ const Services = () => {
   }
 
   const handleBookService = () => {
+    console.log('🔍 handleBookService called');
+    console.log('🔍 selectedItems:', selectedItems);
+    console.log('🔍 selectedService:', selectedService);
+    
     if (selectedItems.length === 0) {
       Alert.alert("No Items Selected", "Please select at least one item to proceed.")
       return
     }
 
-    // Navigate to booking page with selected items and service data
-    router.push({
-      pathname: '/book-service',
-      params: {
+    try {
+      // Navigate to booking page with selected items and service data
+      console.log('🔍 Navigating to /book-service with params:', {
         selectedItems: JSON.stringify(selectedItems),
         selectedService: JSON.stringify(selectedService)
-      }
-    })
+      });
+      
+      router.push({
+        pathname: '/book-service',
+        params: {
+          selectedItems: JSON.stringify(selectedItems),
+          selectedService: JSON.stringify(selectedService)
+        }
+      });
+    } catch (error) {
+      console.error('❌ Navigation error:', error);
+      Alert.alert('Navigation Error', 'Failed to navigate to booking page');
+    }
   }
 
   const filteredItems =
@@ -234,9 +258,15 @@ const Services = () => {
                   </View>
                 ))}
               </ScrollView>
-              <TouchableOpacity style={styles.proceedButton} onPress={handleBookService}>
+              <TouchableOpacity 
+                style={styles.proceedButton} 
+                onPress={handleBookService}
+                activeOpacity={0.7}
+              >
                 <Text style={styles.proceedButtonText}>Book Selected Services</Text>
               </TouchableOpacity>
+              
+              {/* Remove the test button - it was added for debugging and shouldn't be in production */}
             </View>
           )}
 
@@ -424,16 +454,16 @@ const styles = StyleSheet.create({
   },
   serviceCard: {
     flexDirection: "row",
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    backgroundColor: "#ffffff",
     borderRadius: 20,
     padding: 20,
     marginBottom: 15,
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    // shadowColor: "#000",
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 4,
+    // elevation: 3,
   },
   serviceIcon: {
     width: 60,
@@ -463,7 +493,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   summaryContainer: {
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    backgroundColor: "#ffffff",
     marginHorizontal: 16,
     marginTop: 20,
     borderRadius: 20,
@@ -573,7 +603,7 @@ const styles = StyleSheet.create({
   categoryChip: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    backgroundColor: "#ffffff",
     borderRadius: 25,
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -637,21 +667,21 @@ const styles = StyleSheet.create({
   },
   itemCard: {
     flexDirection: "row",
-    backgroundColor: "white",
+    backgroundColor: "#ffffff",
     borderRadius: 16,
     padding: 16,
     marginBottom: 10,
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    // shadowColor: "#000",
+    // shadowOffset: { width: 0, height: 1 },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 2,
+    // elevation: 2,
   },
   selectedItemCard: {
     borderWidth: 2,
     borderColor: "#4CAF50",
-    backgroundColor: "rgba(76, 175, 80, 0.05)",
+    backgroundColor: "#ffffff",
   },
   itemInfo: {
     flex: 1,

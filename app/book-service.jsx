@@ -6,9 +6,10 @@ import axios from 'axios'
 import * as ImagePicker from 'expo-image-picker'
 import { LinearGradient } from "expo-linear-gradient"
 import { useLocalSearchParams, useRouter } from "expo-router"
-import { useEffect, useState } from "react"
-import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
+import { useEffect, useRef, useState } from "react"
+import { ActivityIndicator, Alert, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
+import { API_URL } from "../config"
 
 const BookService = () => {
   const router = useRouter()
@@ -24,6 +25,9 @@ const BookService = () => {
   const selectedItems = params.selectedItems ? JSON.parse(params.selectedItems) : []
   const selectedService = params.selectedService ? JSON.parse(params.selectedService) : null
 
+  const scrollViewRef = useRef(null)
+  const descriptionInputRef = useRef(null)
+
   useEffect(() => {
     const fetchProfile = async () => {
       setLoading(true)
@@ -35,7 +39,7 @@ const BookService = () => {
         }
         
         // Fetch user profile with address data
-        const response = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/profile`, {
+        const response = await axios.get(`${API_URL}/profile`, {
           headers: { Authorization: `Bearer ${token}` }
         })
         setUser(response.data.user)
@@ -100,7 +104,7 @@ const BookService = () => {
     try {
       const token = await AsyncStorage.getItem('userToken')
       
-      const response = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/address`, 
+      const response = await axios.post(`${API_URL}/address`, 
         {
           street: data.street.trim(),
           area: data.area.trim(),
@@ -121,6 +125,21 @@ const BookService = () => {
     } finally {
       setSaving(false)
     }
+  }
+
+  const handleDescriptionFocus = () => {
+    setTimeout(() => {
+      descriptionInputRef.current?.measureLayout(
+        scrollViewRef.current,
+        (x, y) => {
+          scrollViewRef.current?.scrollTo({
+            y: y - 100, // Offset to give some space above
+            animated: true
+          })
+        },
+        () => {}
+      )
+    }, 100)
   }
 
   const submitBooking = async () => {
@@ -145,7 +164,7 @@ const BookService = () => {
       formData.append("serviceId", selectedService.id);
       formData.append("serviceTitle", selectedService.title);
       formData.append("selectedItems", JSON.stringify(selectedItems));
-      formData.append("description", "");
+      formData.append("description", description);
 
       const addr = user.addressData;
       formData.append("street", addr.street?.trim() || "");
@@ -162,7 +181,7 @@ const BookService = () => {
       );
 
       const resp = await axios.post(
-        `${process.env.EXPO_PUBLIC_API_URL}/book-service`,
+        `${API_URL}/book-service`,
         formData,
         {
           headers: {
@@ -179,6 +198,7 @@ const BookService = () => {
         Alert.alert("Error", resp.data.error || "Unknown error");
       }
     } catch (err) {
+      console.log(err.response.data);
       Alert.alert("Error", err.response?.data?.error || err.message || "Failed to book");
     } finally {
       setSaving(false);
@@ -200,117 +220,129 @@ const BookService = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <LinearGradient colors={["#a8e6cf", "#ffffff"]} style={styles.gradient}>
-        <ScrollView style={styles.scrollView}>
-       
-
-          {/* Service Summary */}
-          <View style={styles.summaryCard}>
-            <Text style={styles.summaryTitle}>Service Summary</Text>
-            <View style={styles.serviceInfo}>
-              <Text style={styles.serviceName}>{selectedService?.title}</Text>
-              <Text style={styles.itemCount}>{selectedItems.length} items selected</Text>
+      <LinearGradient colors={["#a8e6cf", "#dcedc8"]} style={styles.gradient}>
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{ flex: 1 }}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+        >
+          <ScrollView 
+            ref={scrollViewRef}
+            style={styles.scrollView}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            {/* Service Summary */}
+            <View style={styles.summaryCard}>
+              <Text style={styles.summaryTitle}>Service Summary</Text>
+              <View style={styles.serviceInfo}>
+                <Text style={styles.serviceName}>{selectedService?.title}</Text>
+                <Text style={styles.itemCount}>{selectedItems.length} items selected</Text>
+              </View>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                {selectedItems.map((item, index) => (
+                  <View key={index} style={styles.selectedItem}>
+                    <Text style={styles.itemName}>{item.name}</Text>
+                    <Text style={styles.itemPrice}>{item.price}</Text>
+                  </View>
+                ))}
+              </ScrollView>
             </View>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              {selectedItems.map((item, index) => (
-                <View key={index} style={styles.selectedItem}>
-                  <Text style={styles.itemName}>{item.name}</Text>
-                  <Text style={styles.itemPrice}>{item.price}</Text>
-                </View>
-              ))}
-            </ScrollView>
-          </View>
 
-          {/* Address Section */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Pickup Address</Text>
-            {hasAddress ? (
-              <View style={styles.addressCard}>
-                <View style={styles.addressInfo}>
-                  <Text style={styles.addressText}>
-                    {user?.addressData?.street}, {user?.addressData?.area}
-                  </Text>
-                  <Text style={styles.addressText}>
-                    {user?.addressData?.city} - {user?.addressData?.pincode}
-                  </Text>
+            {/* Address Section */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Pickup Address</Text>
+              {hasAddress ? (
+                <View style={styles.addressCard}>
+                  <View style={styles.addressInfo}>
+                    <Text style={styles.addressText}>
+                      {user?.addressData?.street}, {user?.addressData?.area}
+                    </Text>
+                    <Text style={styles.addressText}>
+                      {user?.addressData?.city} - {user?.addressData?.pincode}
+                    </Text>
+                  </View>
+                  <TouchableOpacity 
+                    style={styles.editButton}
+                    onPress={() => router.push('/edit-address')}
+                  >
+                    <Ionicons name="create-outline" size={20} color="#4CAF50" />
+                  </TouchableOpacity>
                 </View>
+              ) : (
                 <TouchableOpacity 
-                  style={styles.editButton}
+                  style={styles.addAddressButton}
                   onPress={() => router.push('/edit-address')}
                 >
-                  <Ionicons name="create-outline" size={20} color="#4CAF50" />
+                  <Ionicons name="add-circle-outline" size={24} color="#4CAF50" />
+                  <Text style={styles.addAddressText}>Add Pickup Address</Text>
                 </TouchableOpacity>
-              </View>
-            ) : (
-              <TouchableOpacity 
-                style={styles.addAddressButton}
-                onPress={() => router.push('/edit-address')}
-              >
-                <Ionicons name="add-circle-outline" size={24} color="#4CAF50" />
-                <Text style={styles.addAddressText}>Add Pickup Address</Text>
-              </TouchableOpacity>
-            )}
-          </View>
+              )}
+            </View>
 
-          {/* Image Upload Section */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Upload Images</Text>
-            <Text style={styles.sectionSubtitle}>Upload photos of your items for better service</Text>
-            
-            <TouchableOpacity style={styles.uploadButton} onPress={pickImage}>
-              <Ionicons name="camera-outline" size={32} color="#4CAF50" />
-              <Text style={styles.uploadText}>Add Photos</Text>
+            {/* Image Upload Section */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Upload Images</Text>
+              <Text style={styles.sectionSubtitle}>Upload photos of your items for better service</Text>
+              
+              <TouchableOpacity style={styles.uploadButton} onPress={pickImage}>
+                <Ionicons name="camera-outline" size={32} color="#4CAF50" />
+                <Text style={styles.uploadText}>Add Photos</Text>
+              </TouchableOpacity>
+
+              {images.length > 0 && (
+                <View style={styles.imagesContainer}>
+                  <Text style={styles.imagesTitle}>Selected Images ({images.length})</Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    {images.map((image) => (
+                      <View key={image.id} style={styles.imageContainer}>
+                        <Image source={{ uri: image.uri }} style={styles.image} />
+                        <TouchableOpacity 
+                          style={styles.removeImageButton}
+                          onPress={() => removeImage(image.id)}
+                        >
+                          <Ionicons name="close-circle" size={24} color="#F44336" />
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+                  </ScrollView>
+                </View>
+              )}
+            </View>
+
+            {/* Description Section */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Additional Details</Text>
+              <TextInput
+                ref={descriptionInputRef}
+                style={styles.descriptionInput}
+                placeholder="Add any additional details about your items or special requirements..."
+                value={description}
+                onChangeText={setDescription}
+                textAlignVertical="top"
+                returnKeyType="done"
+                onFocus={handleDescriptionFocus}
+                
+              />
+            </View>
+
+            {/* Submit Button */}
+            <TouchableOpacity 
+              style={[styles.submitButton, saving && styles.submitButtonDisabled]}
+              onPress={submitBooking} 
+              disabled={saving}
+            >
+              {saving ? (
+                <ActivityIndicator color="white" size="small" />
+              ) : (
+                <Text style={styles.submitButtonText}>Book Service</Text>
+              )}
             </TouchableOpacity>
 
-            {images.length > 0 && (
-              <View style={styles.imagesContainer}>
-                <Text style={styles.imagesTitle}>Selected Images ({images.length})</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                  {images.map((image) => (
-                    <View key={image.id} style={styles.imageContainer}>
-                      <Image source={{ uri: image.uri }} style={styles.image} />
-                      <TouchableOpacity 
-                        style={styles.removeImageButton}
-                        onPress={() => removeImage(image.id)}
-                      >
-                        <Ionicons name="close-circle" size={24} color="#F44336" />
-                      </TouchableOpacity>
-                    </View>
-                  ))}
-                </ScrollView>
-              </View>
-            )}
-          </View>
-
-          {/* Description Section */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Additional Details</Text>
-            <TextInput
-              style={styles.descriptionInput}
-              placeholder="Add any additional details about your items or special requirements..."
-              value={description}
-              onChangeText={setDescription}
-              multiline
-              numberOfLines={4}
-              textAlignVertical="top"
-            />
-          </View>
-
-          {/* Submit Button */}
-          <TouchableOpacity 
-            style={[styles.submitButton, saving && styles.submitButtonDisabled]}
-            onPress={submitBooking} 
-            disabled={saving}
-          >
-            {saving ? (
-              <ActivityIndicator color="white" size="small" />
-            ) : (
-              <Text style={styles.submitButtonText}>Book Service</Text>
-            )}
-          </TouchableOpacity>
-
-          <View style={{ height: 30 }} />
-        </ScrollView>
+            <View style={{ height: 30 }} />
+          </ScrollView>
+        </KeyboardAvoidingView>
       </LinearGradient>
     </SafeAreaView>
   )
@@ -330,6 +362,9 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
+  scrollContent: {
+    flexGrow: 1,
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -346,7 +381,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 15,
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    backgroundColor: "#ffffff",
     marginHorizontal: 16,
     marginTop: 10,
     borderRadius: 16,
@@ -363,7 +398,7 @@ const styles = StyleSheet.create({
     width: 34,
   },
   summaryCard: {
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    backgroundColor: "#ffffff",
     marginHorizontal: 16,
     marginTop: 20,
     borderRadius: 20,
@@ -413,7 +448,7 @@ const styles = StyleSheet.create({
     opacity: 0.9,
   },
   section: {
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    backgroundColor: "#ffffff",
     marginHorizontal: 16,
     marginTop: 20,
     borderRadius: 20,
