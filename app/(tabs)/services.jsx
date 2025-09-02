@@ -1,5 +1,3 @@
-"use client"
-
 import { Ionicons } from "@expo/vector-icons"
 import { LinearGradient } from "expo-linear-gradient"
 import { useLocalSearchParams, useRouter } from "expo-router"
@@ -27,16 +25,6 @@ const Services = () => {
     }
   }, [params.selectedService])
 
-  // Debug logging for state values
-  useEffect(() => {
-    console.log('🔍 Services component state:', {
-      selectedService: selectedService?.title,
-      selectedItemsCount: selectedItems.length,
-      selectedItems: selectedItems,
-      showItemModal
-    });
-  }, [selectedService, selectedItems, showItemModal]);
-
   const services = [
     {
       id: 1,
@@ -45,14 +33,14 @@ const Services = () => {
       icon: "refresh",
       color: "#4CAF50",
       items: [
-        { id: 1, name: "Iron & Steel", price: "₹25-30/kg", category: "Metal" },
-        { id: 2, name: "Aluminum", price: "₹120-140/kg", category: "Metal" },
-        { id: 3, name: "Copper", price: "₹450-500/kg", category: "Metal" },
-        { id: 4, name: "Brass", price: "₹280-320/kg", category: "Metal" },
-        { id: 5, name: "Newspaper", price: "₹8-12/kg", category: "Paper" },
-        { id: 6, name: "Cardboard", price: "₹6-10/kg", category: "Paper" },
-        { id: 7, name: "Plastic Bottles", price: "₹15-20/kg", category: "Plastic" },
-        { id: 8, name: "Car Battery", price: "₹80-120/piece", category: "Battery" },
+        { id: 1, name: "Iron & Steel", price: "Quote on Request", category: "Metal" },
+        { id: 2, name: "Aluminum", price: "Quote on Request", category: "Metal" },
+        { id: 3, name: "Copper", price: "Quote on Request", category: "Metal" },
+        { id: 4, name: "Brass", price: "Quote on Request", category: "Metal" },
+        { id: 5, name: "Newspaper", price: "Quote on Request", category: "Paper" },
+        { id: 6, name: "Cardboard", price: "Quote on Request", category: "Paper" },
+        { id: 7, name: "Plastic Bottles", price: "Quote on Request", category: "Plastic" },
+        { id: 8, name: "Car Battery", price: "Quote on Request", category: "Battery" },
       ],
     },
     {
@@ -62,14 +50,14 @@ const Services = () => {
       icon: "phone-portrait",
       color: "#2196F3",
       items: [
-        { id: 9, name: "Desktop Computer", price: "₹500-800/piece", category: "Computer" },
-        { id: 10, name: "Laptop", price: "₹300-600/piece", category: "Computer" },
-        { id: 11, name: "Smartphone", price: "₹100-300/piece", category: "Mobile" },
-        { id: 12, name: "Tablet", price: "₹200-400/piece", category: "Mobile" },
-        { id: 13, name: "LED TV", price: "₹800-1500/piece", category: "Appliance" },
-        { id: 14, name: "Refrigerator", price: "₹1000-2000/piece", category: "Appliance" },
-        { id: 15, name: "Printer", price: "₹200-500/piece", category: "Office" },
-        { id: 16, name: "UPS Battery", price: "₹50-100/piece", category: "Battery" },
+        { id: 9, name: "Desktop Computer", price: "Quote on Request", category: "Computer" },
+        { id: 10, name: "Laptop", price: "Quote on Request", category: "Computer" },
+        { id: 11, name: "Smartphone", price: "Quote on Request", category: "Mobile" },
+        { id: 12, name: "Tablet", price: "Quote on Request", category: "Mobile" },
+        { id: 13, name: "LED TV", price: "Quote on Request", category: "Appliance" },
+        { id: 14, name: "Refrigerator", price: "Quote on Request", category: "Appliance" },
+        { id: 15, name: "Printer", price: "Quote on Request", category: "Office" },
+        { id: 16, name: "UPS Battery", price: "Quote on Request", category: "Battery" },
       ],
     },
     {
@@ -83,8 +71,8 @@ const Services = () => {
         { id: 18, name: "Commercial Demolition", price: "Quote on Request", category: "Commercial" },
         { id: 19, name: "Industrial Demolition", price: "Quote on Request", category: "Industrial" },
         { id: 20, name: "Selective Demolition", price: "Quote on Request", category: "Selective" },
-        { id: 21, name: "Concrete Breaking", price: "₹50-80/sq ft", category: "Concrete" },
-        { id: 22, name: "Wall Removal", price: "₹30-50/sq ft", category: "Wall" },
+        { id: 21, name: "Concrete Breaking", price: "Quote on Request", category: "Concrete" },
+        { id: 22, name: "Wall Removal", price: "Quote on Request", category: "Wall" },
       ],
     },
     {
@@ -107,12 +95,12 @@ const Services = () => {
       icon: "leaf",
       color: "#8BC34A",
       items: [
-        { id: 27, name: "Paper Recycling", price: "₹8-15/kg", category: "Paper" },
-        { id: 28, name: "Plastic Recycling", price: "₹12-25/kg", category: "Plastic" },
-        { id: 29, name: "Glass Recycling", price: "₹5-10/kg", category: "Glass" },
-        { id: 30, name: "Metal Recycling", price: "₹20-500/kg", category: "Metal" },
-        { id: 31, name: "Organic Waste", price: "₹2-5/kg", category: "Organic" },
-        { id: 32, name: "Textile Recycling", price: "₹8-15/kg", category: "Textile" },
+        { id: 27, name: "Paper Recycling", price: "Quote on Request", category: "Paper" },
+        { id: 28, name: "Plastic Recycling", price: "Quote on Request", category: "Plastic" },
+        { id: 29, name: "Glass Recycling", price: "Quote on Request", category: "Glass" },
+        { id: 30, name: "Metal Recycling", price: "Quote on Request", category: "Metal" },
+        { id: 31, name: "Organic Waste", price: "Quote on Request", category: "Organic" },
+        { id: 32, name: "Textile Recycling", price: "Quote on Request", category: "Textile" },
       ],
     },
   ]
@@ -158,22 +146,12 @@ const Services = () => {
   }
 
   const handleBookService = () => {
-    console.log('🔍 handleBookService called');
-    console.log('🔍 selectedItems:', selectedItems);
-    console.log('🔍 selectedService:', selectedService);
-    
     if (selectedItems.length === 0) {
       Alert.alert("No Items Selected", "Please select at least one item to proceed.")
       return
     }
 
     try {
-      // Navigate to booking page with selected items and service data
-      console.log('🔍 Navigating to /book-service with params:', {
-        selectedItems: JSON.stringify(selectedItems),
-        selectedService: JSON.stringify(selectedService)
-      });
-      
       router.push({
         pathname: '/book-service',
         params: {
@@ -182,7 +160,6 @@ const Services = () => {
         }
       });
     } catch (error) {
-      console.error('❌ Navigation error:', error);
       Alert.alert('Navigation Error', 'Failed to navigate to booking page');
     }
   }
@@ -207,22 +184,6 @@ const Services = () => {
     <SafeAreaView style={styles.container}>
       <LinearGradient colors={["#a8e6cf", "#ffffff"]} style={styles.gradient}>
         <ScrollView >
-          {/* Header */}
-          {/* <View style={styles.header}>
-            <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-              <Ionicons name="arrow-back" size={24} color="#2E7D32" />
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>Our Services</Text>
-            <View style={styles.cartButton}>
-              {selectedItems.length > 0 && (
-                <View style={styles.cartBadge}>
-                  <Text style={styles.cartBadgeText}>{selectedItems.length}</Text>
-                </View>
-              )}
-              <Ionicons name="bag-outline" size={24} color="#2E7D32" />
-            </View>
-          </View> */}
-
           {/* Services Grid */}
           <View style={styles.servicesContainer}>
             <Text style={styles.sectionTitle}>Choose a Service to Book</Text>
@@ -265,8 +226,6 @@ const Services = () => {
               >
                 <Text style={styles.proceedButtonText}>Book Selected Services</Text>
               </TouchableOpacity>
-              
-              {/* Remove the test button - it was added for debugging and shouldn't be in production */}
             </View>
           )}
 

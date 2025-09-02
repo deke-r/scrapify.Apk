@@ -1,30 +1,37 @@
 import Constants from 'expo-constants';
+import { addDebugLog } from './DebugScreen';
 
 // Configuration utility for reliable API URL access
 export const getApiUrl = () => {
-  console.log('🔧 Config: Starting API URL resolution...');
+  addDebugLog('info', 'Config: Starting API URL resolution...');
   
   // Method 1: Try to get from Constants.expoConfig.extra.apiUrl (works in production builds)
   if (Constants.expoConfig?.extra?.apiUrl) {
-    console.log('✅ API URL found in Constants.expoConfig.extra.apiUrl:', Constants.expoConfig.extra.apiUrl);
+    addDebugLog('success', 'API URL found in Constants.expoConfig.extra.apiUrl', Constants.expoConfig.extra.apiUrl);
     return Constants.expoConfig.extra.apiUrl;
   }
 
   // Method 2: Try to get from Constants.manifest.extra.apiUrl (fallback for older Expo versions)
   if (Constants.manifest?.extra?.apiUrl) {
-    console.log('✅ API URL found in Constants.manifest.extra.apiUrl:', Constants.manifest.extra.apiUrl);
+    addDebugLog('success', 'API URL found in Constants.manifest.extra.apiUrl', Constants.manifest.extra.apiUrl);
     return Constants.manifest.extra.apiUrl;
   }
 
   // Method 3: Try to get from process.env (works in development)
   if (process.env.EXPO_PUBLIC_API_URL) {
-    console.log('✅ API URL found in process.env.EXPO_PUBLIC_API_URL:', process.env.EXPO_PUBLIC_API_URL);
+    addDebugLog('success', 'API URL found in process.env.EXPO_PUBLIC_API_URL', process.env.EXPO_PUBLIC_API_URL);
     return process.env.EXPO_PUBLIC_API_URL;
   }
 
-  // Method 4: Hardcoded fallback (last resort)
+  // Method 4: Try to get from Constants.expoConfig.extra (alternative path)
+  if (Constants.expoConfig?.extra) {
+    addDebugLog('info', 'Checking Constants.expoConfig.extra for API URL...');
+    addDebugLog('info', 'Available keys in Constants.expoConfig.extra', Object.keys(Constants.expoConfig.extra));
+  }
+
+  // Method 5: Hardcoded fallback (last resort)
   const fallbackUrl = 'https://api.scrapify.in/api/scrapify';
-  console.log('⚠️ Using hardcoded fallback API URL:', fallbackUrl);
+  addDebugLog('warning', 'Using hardcoded fallback API URL', fallbackUrl);
   return fallbackUrl;
 };
 
@@ -47,7 +54,7 @@ export const getConfigDebugInfo = () => {
     'Constants.expoConfig.extra keys': Constants.expoConfig?.extra ? Object.keys(Constants.expoConfig.extra) : 'none',
   };
   
-  console.log('🔧 Config Debug Info:', debugInfo);
+  addDebugLog('info', 'Config Debug Info gathered', debugInfo);
   return debugInfo;
 };
 
@@ -59,7 +66,6 @@ const getApiUrlSource = () => {
   return 'Hardcoded fallback';
 };
 
-console.log('🔧 Config loaded. API_URL:', API_URL);
-console.log('🔧 Config source:', getApiUrlSource());
-console.log('🔧 Constants.expoConfig:', Constants.expoConfig);
-console.log('🔧 Constants.manifest:', Constants.manifest); 
+addDebugLog('info', 'Config loaded successfully', { API_URL, source: getApiUrlSource() });
+addDebugLog('info', 'Constants.expoConfig', Constants.expoConfig);
+addDebugLog('info', 'Constants.manifest', Constants.manifest); 

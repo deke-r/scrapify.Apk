@@ -1,5 +1,3 @@
-"use client"
-
 import { Ionicons } from "@expo/vector-icons"
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import axios from 'axios'
@@ -72,6 +70,51 @@ const BookService = () => {
   }, []) // Removed setValue from dependency array
 
   const pickImage = async () => {
+    Alert.alert(
+      'Select Image Source',
+      'Choose how you want to add photos',
+      [
+        {
+          text: 'Camera',
+          onPress: () => openCamera(),
+        },
+        {
+          text: 'Gallery',
+          onPress: () => openGallery(),
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+      ]
+    )
+  }
+
+  const openCamera = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync()
+    
+    if (status !== 'granted') {
+      Alert.alert('Permission needed', 'Please grant camera permissions to take photos.')
+      return
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsMultipleSelection: false,
+      aspect: [4, 3],
+      quality: 0.8,
+    })
+
+    if (!result.canceled) {
+      const newImages = result.assets.map(asset => ({
+        uri: asset.uri,
+        id: Date.now() + Math.random(),
+      }))
+      setImages([...images, ...newImages])
+    }
+  }
+
+  const openGallery = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
     
     if (status !== 'granted') {
@@ -143,6 +186,8 @@ const BookService = () => {
   }
 
   const submitBooking = async () => {
+   
+   
     if (!user?.addressData?.street) {
       Alert.alert("Missing address", "Please add address in profile.");
       return;
@@ -156,21 +201,31 @@ const BookService = () => {
       return;
     }
 
+    
+
+
     setSaving(true);
     try {
       const token = await AsyncStorage.getItem("userToken");
+      
+      
       const formData = new FormData();
+
 
       formData.append("serviceId", selectedService.id);
       formData.append("serviceTitle", selectedService.title);
       formData.append("selectedItems", JSON.stringify(selectedItems));
       formData.append("description", description);
 
+     
+
       const addr = user.addressData;
       formData.append("street", addr.street?.trim() || "");
       formData.append("area", addr.area?.trim() || "");
       formData.append("city", addr.city || "");
       formData.append("pincode", addr.pincode?.trim() || "");
+
+  
 
       images.forEach((img, idx) =>
         formData.append("images", {
@@ -179,6 +234,8 @@ const BookService = () => {
           name: `img_${idx}.jpg`,
         })
       );
+    
+
 
       const resp = await axios.post(
         `${API_URL}/book-service`,
@@ -186,20 +243,25 @@ const BookService = () => {
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
           },
         }
       );
 
       if (resp.data.success) {
+      
         Alert.alert("Booked!", "Booking confirmed.", [
           { text: "OK", onPress: () => router.replace("/(tabs)/") },
         ]);
       } else {
         Alert.alert("Error", resp.data.error || "Unknown error");
       }
-    } catch (err) {
-      console.log(err.response.data);
-      Alert.alert("Error", err.response?.data?.error || err.message || "Failed to book");
+    }catch (err) {
+      console.log("Booking error:", err.response?.data || err.message || err);
+      Alert.alert(
+        "Error",
+        err.response?.data?.error || err.message || "Failed to book"
+      );
     } finally {
       setSaving(false);
     }

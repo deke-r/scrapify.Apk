@@ -343,6 +343,44 @@ export default function Index() {
             </View>
           </View>
 
+          {/* Book Order Button */}
+          <View
+            style={{
+              marginHorizontal: 16,
+              marginVertical: 20,
+            }}
+          >
+            <TouchableOpacity
+              onPress={() => router.push("/(tabs)/services")}
+              style={{
+                backgroundColor: "#1E7A1E",
+                borderRadius: 20,
+                paddingVertical: 18,
+                paddingHorizontal: 30,
+                alignItems: "center",
+                justifyContent: "center",
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.2,
+                shadowRadius: 8,
+                elevation: 5,
+                flexDirection: "row",
+              }}
+            >
+              <Ionicons name="add-circle" size={24} color="white" style={{ marginRight: 10 }} />
+              <Text
+                style={{
+                  color: "white",
+                  fontWeight: "bold",
+                  fontSize: 18,
+                  textAlign: "center",
+                }}
+              >
+                Book Order
+              </Text>
+            </TouchableOpacity>
+          </View>
+
           <View
             style={{
               marginHorizontal: 16,

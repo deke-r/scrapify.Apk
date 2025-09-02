@@ -6,7 +6,6 @@ import { useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Alert, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import DebugScreen from "../../DebugScreen";
 import { API_URL } from "../../config";
 
 export default function ForgotPassword() {
@@ -196,9 +195,6 @@ export default function ForgotPassword() {
                       </TouchableOpacity>
                     </>
                   )}
-                  
-                  {/* Debug Screen - Only visible in production builds for troubleshooting */}
-                  <DebugScreen />
                 </View>
               </BlurView>
             </View>
