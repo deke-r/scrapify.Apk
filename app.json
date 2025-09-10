@@ -2,7 +2,7 @@
   "expo": {
     "name": "Scrapify",
     "slug": "scrapifyApp",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/images/logo2.png",
     "scheme": "scrapifyapp",
@@ -18,7 +18,7 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.senseprojects.scrapifyApp",
-      "versionCode": 3
+      "versionCode": 4
     },
     "web": {
       "bundler": "metro",
