@@ -184,10 +184,38 @@ const Services = () => {
     <SafeAreaView style={styles.container}>
       <LinearGradient colors={["#a8e6cf", "#ffffff"]} style={styles.gradient}>
         <ScrollView >
+
+
+        {selectedItems.length > 0 && (
+            <View style={styles.summaryContainer}>
+              <Text style={styles.summaryTitle}>Selected Items ({selectedItems.length})</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                {selectedItems.map((item, index) => (
+                  <View key={index} style={styles.summaryItem}>
+                    <Text style={styles.summaryItemName}>{item.name}</Text>
+                    <Text style={styles.summaryItemPrice}>{item.price}</Text>
+                  </View>
+                ))}
+              </ScrollView>
+              <TouchableOpacity 
+                style={styles.proceedButton} 
+                onPress={handleBookService}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.proceedButtonText}>Book Selected Services</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+
           {/* Services Grid */}
           <View style={styles.servicesContainer}>
             <Text style={styles.sectionTitle}>Choose a Service to Book</Text>
             <Text style={styles.sectionSubtitle}>Select items from any service and book your pickup</Text>
+           
+
+
+           
             {services.map((service) => (
               <TouchableOpacity
                 key={service.id}
@@ -208,26 +236,7 @@ const Services = () => {
           </View>
 
           {/* Selected Items Summary */}
-          {selectedItems.length > 0 && (
-            <View style={styles.summaryContainer}>
-              <Text style={styles.summaryTitle}>Selected Items ({selectedItems.length})</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                {selectedItems.map((item, index) => (
-                  <View key={index} style={styles.summaryItem}>
-                    <Text style={styles.summaryItemName}>{item.name}</Text>
-                    <Text style={styles.summaryItemPrice}>{item.price}</Text>
-                  </View>
-                ))}
-              </ScrollView>
-              <TouchableOpacity 
-                style={styles.proceedButton} 
-                onPress={handleBookService}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.proceedButtonText}>Book Selected Services</Text>
-              </TouchableOpacity>
-            </View>
-          )}
+    
 
           <View style={{ height: 30 }} />
         </ScrollView>

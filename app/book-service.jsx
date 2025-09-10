@@ -4,9 +4,10 @@ import axios from 'axios'
 import * as ImagePicker from 'expo-image-picker'
 import { LinearGradient } from "expo-linear-gradient"
 import { useLocalSearchParams, useRouter } from "expo-router"
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useRef, useState } from "react"
 import { ActivityIndicator, Alert, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
+import { useFocusEffect } from '@react-navigation/native'
 import { API_URL } from "../config"
 
 const BookService = () => {
@@ -26,48 +27,51 @@ const BookService = () => {
   const scrollViewRef = useRef(null)
   const descriptionInputRef = useRef(null)
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      setLoading(true)
-      try {
-        const token = await AsyncStorage.getItem('userToken')
-        if (!token) {
+  // Replace the useEffect with useFocusEffect
+  useFocusEffect(
+    useCallback(() => {
+      const fetchProfile = async () => {
+        setLoading(true)
+        try {
+          const token = await AsyncStorage.getItem('userToken')
+          if (!token) {
+            router.replace('/(auth)/login')
+            return
+          }
+          
+          // Fetch user profile with address data
+          const response = await axios.get(`${API_URL}/profile`, {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+          setUser(response.data.user)
+          
+          // Check if user has address
+          const hasAddressData = response.data.user.addressData && 
+            response.data.user.addressData.street && 
+            response.data.user.addressData.area && 
+            response.data.user.addressData.city && 
+            response.data.user.addressData.pincode
+          
+          setHasAddress(!!hasAddressData)
+          
+          // Set address fields from the response if available
+          if (response.data.user.addressData) {
+            const addressData = response.data.user.addressData
+            // setValue('street', addressData.street || '') // Removed as per edit hint
+            // setValue('area', addressData.area || '') // Removed as per edit hint
+            // setValue('city', addressData.city || '') // Removed as per edit hint
+            // setValue('pincode', addressData.pincode || '') // Removed as per edit hint
+          }
+        } catch (err) {
+          Alert.alert('Error', 'Failed to fetch profile info. Please login again.')
           router.replace('/(auth)/login')
-          return
+        } finally {
+          setLoading(false)
         }
-        
-        // Fetch user profile with address data
-        const response = await axios.get(`${API_URL}/profile`, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-        setUser(response.data.user)
-        
-        // Check if user has address
-        const hasAddressData = response.data.user.addressData && 
-          response.data.user.addressData.street && 
-          response.data.user.addressData.area && 
-          response.data.user.addressData.city && 
-          response.data.user.addressData.pincode
-        
-        setHasAddress(!!hasAddressData)
-        
-        // Set address fields from the response if available
-        if (response.data.user.addressData) {
-          const addressData = response.data.user.addressData
-          // setValue('street', addressData.street || '') // Removed as per edit hint
-          // setValue('area', addressData.area || '') // Removed as per edit hint
-          // setValue('city', addressData.city || '') // Removed as per edit hint
-          // setValue('pincode', addressData.pincode || '') // Removed as per edit hint
-        }
-      } catch (err) {
-        Alert.alert('Error', 'Failed to fetch profile info. Please login again.')
-        router.replace('/(auth)/login')
-      } finally {
-        setLoading(false)
       }
-    }
-    fetchProfile()
-  }, []) // Removed setValue from dependency array
+      fetchProfile()
+    }, [])
+  )
 
   const pickImage = async () => {
     Alert.alert(
