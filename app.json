@@ -2,7 +2,7 @@
   "expo": {
     "name": "Scrapify",
     "slug": "scrapifyApp",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "orientation": "portrait",
     "icon": "./assets/images/logo2.png",
     "scheme": "scrapifyapp",
@@ -11,15 +11,13 @@
     "ios": {
       "supportsTablet": true
     },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/images/logo2.png",
-        "backgroundColor": "#ffffff"
-      },
-      "edgeToEdgeEnabled": true,
-      "package": "com.senseprojects.scrapifyApp",
-      "versionCode": 4
-    },
+"android": {
+  "adaptiveIcon": {
+    "foregroundImage": "./assets/images/adaptive-icon.png",
+    "backgroundColor": "#ffffff"
+  },
+  "versionCode": 5
+},
     "web": {
       "bundler": "metro",
       "output": "static",
